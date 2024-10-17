@@ -1,1 +1,1 @@
-# lojas-go-backend
+# lojas-go
