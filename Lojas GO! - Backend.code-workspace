@@ -1,0 +1,17 @@
+{
+  "folders": [
+	{
+		"path": "gateway"
+	},
+	{
+		"path": "products"
+	},
+	{
+		"path": "stores"
+	},
+	{
+		"path": "users"
+	}
+],
+  "settings": {}
+}
