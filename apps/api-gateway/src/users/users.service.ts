@@ -19,11 +19,11 @@ export class UsersService {
   }
 
   update(id: string, data: UpdateUserDto) {
-    return this.usersClient.send('USERS:UPDATE', { data: data })
+    return this.usersClient.send('USERS:UPDATE', { id, data })
   }
 
-  partialUpdate(data: PartialUpdateUserDto) {
-    return this.usersClient.send('USERS:PARTIAL_UPDATE', { data: data })
+  partialUpdate(id: string, data: PartialUpdateUserDto) {
+    return this.usersClient.send('USERS:PARTIAL_UPDATE', { id, data })
   }
 
   delete(id: string) {

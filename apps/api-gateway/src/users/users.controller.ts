@@ -28,7 +28,7 @@ export class UsersController {
 
   @Patch(':id')
   partialUpdate(@Param('id') id: string, @Body() data: PartialUpdateUserDto) {
-    return this.usersService.partialUpdate(data)
+    return this.usersService.partialUpdate(id, data)
   }
 
   @Delete(':id')
