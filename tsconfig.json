@@ -18,8 +18,18 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@lib/users": ["libs/users/src"],
-      "@lib/users/*": ["libs/users/src/*"]
+      "@lib/users": [
+        "libs/users/src"
+      ],
+      "@lib/users/*": [
+        "libs/users/src/*"
+      ],
+      "@lib/stores": [
+        "libs/stores/src"
+      ],
+      "@lib/stores/*": [
+        "libs/stores/src/*"
+      ]
     }
   }
 }
