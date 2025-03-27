@@ -2,5 +2,14 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
 
-  "material-icon-theme.activeIconPack": "nest"
+  "material-icon-theme.activeIconPack": "nest",
+
+  "material-icon-theme.files.customClones": [
+    {
+      "name": "nest-service-mock",
+      "base": "nest",
+      "color": "gray",
+      "fileExtensions": ["service.mock.ts"]
+    }
+  ]
 }
