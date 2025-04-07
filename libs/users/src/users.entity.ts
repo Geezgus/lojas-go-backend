@@ -1,3 +1,3 @@
-export type User = { id: string; name: string; email: string; sub: string; businesses: Business[] }
+export type User = { id: string; name: string; email: string; sub: string; stores: Store[] }
 
-type Business = { cnpj: string; name: string; logo: string }
+type Store = { cnpj: string; name: string; logo: string }

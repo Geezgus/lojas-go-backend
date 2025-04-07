@@ -11,7 +11,7 @@ export class UsersService {
       email: 'stefane.main@gmail.com',
       name: 'Stefane Maria',
       sub: 'google-oauth2|105899574833026762742',
-      businesses: [
+      stores: [
         {
           name: 'Business 1',
           cnpj: '12345678000123',
@@ -29,7 +29,7 @@ export class UsersService {
       email: 'stefane.maria0901@gmail.com',
       name: 'Stefane Maria',
       sub: 'google-oauth2|114250707402792790436',
-      businesses: [],
+      stores: [],
     },
   ]
 
@@ -47,7 +47,7 @@ export class UsersService {
   }
 
   create(dto: CreateUserDto): Promise<User> {
-    var newUser: User = { id: '1', businesses: [], ...dto }
+    var newUser: User = { id: '1', stores: [], ...dto }
     return new Promise((resolve) => {
       resolve(newUser)
     })
