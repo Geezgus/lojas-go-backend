@@ -1,7 +1,7 @@
-import { Controller, Get } from '@nestjs/common'
-import { UsersService } from './users.service'
-import { MessagePattern, Payload } from '@nestjs/microservices'
 import { CreateUserDto, PartialUpdateUserDto, UpdateUserDto } from '@lib/users'
+import { Controller } from '@nestjs/common'
+import { MessagePattern, Payload } from '@nestjs/microservices'
+import { UsersService } from './users.service'
 
 @Controller()
 export class UsersController {
@@ -20,6 +20,11 @@ export class UsersController {
   @MessagePattern('USERS:CREATE')
   create(@Payload() { data }: { data: CreateUserDto }) {
     return this.usersService.create(data)
+  }
+
+  @MessagePattern('USERS:AUTH')
+  autenticate(@Payload() { data }: { data: CreateUserDto }) {
+    return this.usersService.verifyAndCreateIfNeeded(data)
   }
 
   @MessagePattern('USERS:UPDATE')

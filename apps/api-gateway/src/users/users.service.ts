@@ -29,4 +29,8 @@ export class UsersService {
   delete(id: string) {
     return this.usersClient.send('USERS:DELETE', { id: id })
   }
+
+  authenticate(data: CreateUserDto) {
+    return this.usersClient.send('USERS:AUTH', { data: data })
+  }
 }

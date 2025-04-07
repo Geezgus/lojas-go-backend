@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Put, Patch, Delete, Param, Body } from '@nestjs/common'
-import { UsersService } from './users.service'
 import { CreateUserDto, PartialUpdateUserDto, UpdateUserDto } from '@lib/users'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common'
+import { UsersService } from './users.service'
 
 @Controller('users')
 export class UsersController {
@@ -19,6 +19,11 @@ export class UsersController {
   @Post()
   create(@Body() data: CreateUserDto) {
     return this.usersService.create(data)
+  }
+
+  @Post('auth')
+  authenticate(@Body() data: CreateUserDto) {
+    return this.usersService.authenticate(data)
   }
 
   @Put(':id')
