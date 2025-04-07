@@ -4,6 +4,35 @@ import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class UsersService {
+  // Mocked data for demonstration purposes
+  private users: User[] = [
+    {
+      id: '1',
+      email: 'stefane.main@gmail.com',
+      name: 'Stefane Maria',
+      sub: 'google-oauth2|105899574833026762742',
+      businesses: [
+        {
+          name: 'Business 1',
+          cnpj: '12345678000123',
+          logo: 'https://i0.wp.com/designbox.com.br/wp-content/uploads/2017/04/364981.jpg',
+        },
+        {
+          name: 'Business 2',
+          cnpj: '98765432000198',
+          logo: 'https://i1.wp.com/designbox.com.br/wp-content/uploads/2017/04/364979.jpg',
+        },
+      ],
+    },
+    {
+      id: '2',
+      email: 'stefane.maria0901@gmail.com',
+      name: 'Stefane Maria',
+      sub: 'google-oauth2|114250707402792790436',
+      businesses: [],
+    },
+  ]
+
   findAll(): Promise<User[]> {
     throw new Error('Method not implemented.')
   }
@@ -13,31 +42,12 @@ export class UsersService {
   }
 
   findOneBySub(sub: string): Promise<User | null> {
-    var existingUser: User = {
-      id: '2',
-      name: 'John Doe',
-      email: 'mail@mail.com',
-      sub: 'sub',
-      businesses: [
-        { cnpj: '12345678901234', name: 'My Business 1' },
-        { cnpj: '12345678901235', name: 'My Business 2' },
-      ],
-    }
-
-    return new Promise((resolve) => {
-      resolve(existingUser)
-    })
+    const existingUser = this.users.find((user) => user.sub === sub)
+    return Promise.resolve(existingUser || null)
   }
 
   create(dto: CreateUserDto): Promise<User> {
-    var newUser: User = {
-      id: '1',
-      businesses: [
-        { cnpj: '12345678901234', name: 'My Business 1' },
-        { cnpj: '12345678901235', name: 'My Business 2' },
-      ],
-      ...dto,
-    }
+    var newUser: User = { id: '1', businesses: [], ...dto }
     return new Promise((resolve) => {
       resolve(newUser)
     })
