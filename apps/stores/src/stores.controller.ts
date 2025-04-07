@@ -1,7 +1,7 @@
-import { Controller } from '@nestjs/common'
-import { StoresService } from './stores.service'
-import { MessagePattern, Payload } from '@nestjs/microservices'
 import { CreateStoreDto, PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
+import { Controller } from '@nestjs/common'
+import { MessagePattern, Payload } from '@nestjs/microservices'
+import { StoresService } from './stores.service'
 
 @Controller()
 export class StoresController {
@@ -15,6 +15,11 @@ export class StoresController {
   @MessagePattern('STORES:FIND_ONE')
   findOne(@Payload() { id }: { id: string }) {
     return this.storesService.findOne(id)
+  }
+
+  @MessagePattern('STORES:FIND_BY_USER_ID')
+  findByUserId(@Payload() { id }: { id: string }) {
+    return this.storesService.findByUserId(id)
   }
 
   @MessagePattern('STORES:CREATE')

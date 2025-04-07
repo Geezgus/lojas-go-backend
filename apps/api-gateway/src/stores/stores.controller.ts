@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Put, Patch, Delete, Param, Body } from '@nestjs/common'
-import { StoresService } from './stores.service'
 import { CreateStoreDto, PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common'
+import { StoresService } from './stores.service'
 
 @Controller('stores')
 export class StoresController {
@@ -14,6 +14,11 @@ export class StoresController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.storesService.findOne(id)
+  }
+
+  @Get('/user/:userId')
+  findByUserId(@Param('userId') id: string) {
+    return this.storesService.findByUserId(id)
   }
 
   @Post()

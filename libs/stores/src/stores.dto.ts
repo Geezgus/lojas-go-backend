@@ -1,10 +1,6 @@
-export type CreateStoreDto = {
-  cnpj: string
-  latitude: number
-  longitude: number
-  name: string
-  picture_url: string
-}
+export type CreateStoreDto = { cnpj: string; latitude: number; longitude: number; name: string; picture_url: string }
+
+export type StoreSummaryDto = { id: string; user_id: string; cnpj: string; name: string; picture_url: string }
 
 export type UpdateStoreDto = CreateStoreDto
 

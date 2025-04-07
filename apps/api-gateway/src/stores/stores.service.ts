@@ -14,6 +14,10 @@ export class StoresService {
     return this.storesClient.send('STORES:FIND_ONE', { id })
   }
 
+  findByUserId(id: string) {
+    return this.storesClient.send('STORES:FIND_BY_USER_ID', { id })
+  }
+
   create(data: CreateStoreDto) {
     return this.storesClient.send('STORES:CREATE', { data })
   }
