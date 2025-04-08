@@ -9,7 +9,7 @@ export type Store = {
   address: Address
 }
 
-type Address = {
+export type Address = {
   postalCode: string
   street: string
   number: string
