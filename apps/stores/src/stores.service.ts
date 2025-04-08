@@ -1,5 +1,6 @@
 import { CreateStoreDto, PartialUpdateStoreDto, Store, StoreSummaryDto, UpdateStoreDto } from '@lib/stores'
 import { Injectable } from '@nestjs/common'
+import { S3Service } from './services/s3/s3.service'
 
 @Injectable()
 export class StoresService {
@@ -10,7 +11,7 @@ export class StoresService {
       user_id: '1',
       cnpj: '12345678000123',
       name: 'Empresa A',
-      picture_url: 'https://i0.wp.com/designbox.com.br/wp-content/uploads/2017/04/364981.jpg',
+      pricture_key: 'stores/364979.png',
       latitude: -23.5505,
       longitude: -46.6333,
       address: {
@@ -28,7 +29,7 @@ export class StoresService {
       user_id: '1',
       cnpj: '98765432000198',
       name: 'Empresa B',
-      picture_url: 'https://i1.wp.com/designbox.com.br/wp-content/uploads/2017/04/364979.jpg',
+      pricture_key: 'stores/364981 (1).png',
       latitude: -23.5505,
       longitude: -46.6333,
       address: {
@@ -43,6 +44,8 @@ export class StoresService {
     },
   ]
 
+  constructor(private s3Service: S3Service) {}
+
   findAll(): Promise<Store[]> {
     throw new Error('Method not implemented.')
   }
@@ -51,14 +54,19 @@ export class StoresService {
     throw new Error('Method not implemented.')
   }
 
-  findByUserId(userId: string): Promise<StoreSummaryDto[]> {
+  findByUserId(userId: string): Promise<StoreSummaryDto>[] {
     const stores = this.stores.filter((store) => store.user_id === userId).map((store) => this.mapStoreToSummary(store))
-    return Promise.resolve(stores)
+    return stores
   }
 
-  create(dto: CreateStoreDto): Promise<Store> {
-    throw new Error('Method not implemented.')
+  async create(fileData, storeData: CreateStoreDto): Promise<string> {
+    const imageKey = await this.s3Service.uploadFile(fileData)
+
+    return Promise.resolve(imageKey)
   }
+  // create(dto: CreateStoreDto): Promise<Store> {
+  //   throw new Error('Method not implemented.')
+  // }
 
   update(id: string, dto: UpdateStoreDto): Promise<Store | null> {
     throw new Error('Method not implemented.')
@@ -72,7 +80,9 @@ export class StoresService {
     throw new Error('Method not implemented.')
   }
 
-  private mapStoreToSummary(store: Store): StoreSummaryDto {
-    return { id: store.id, user_id: store.user_id, cnpj: store.cnpj, name: store.name, picture_url: store.picture_url }
+  private async mapStoreToSummary(store: Store): Promise<StoreSummaryDto> {
+    const picture_url: string = await this.s3Service.getImageUrl(store.pricture_key)
+
+    return { id: store.id, user_id: store.user_id, cnpj: store.cnpj, name: store.name, picture_url: picture_url }
   }
 }

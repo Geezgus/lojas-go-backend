@@ -5,7 +5,7 @@ export type Store = {
   latitude: number
   longitude: number
   name: string
-  picture_url: string
+  pricture_key: string
   address: Address
 }
 
