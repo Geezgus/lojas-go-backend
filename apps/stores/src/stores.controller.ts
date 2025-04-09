@@ -27,11 +27,10 @@ export class StoresController {
     @Payload()
     payload: {
       fileData: { buffer: string; originalname: string; mimetype: string }
-      storeData: string
+      data: string
     },
   ) {
-    const storeData = JSON.parse(payload.storeData)
-
+    const storeData = JSON.parse(payload.data)
     const imageData = {
       buffer: Buffer.from(payload.fileData.buffer, 'base64'),
       originalname: payload.fileData.originalname,

@@ -1,7 +1,15 @@
-import { CreateStoreDto, PartialUpdateStoreDto, Store, StoreSummaryDto, UpdateStoreDto } from '@lib/stores'
+import {
+  CreateStoreDto,
+  PartialUpdateStoreDto,
+  Store,
+  StoreSummaryDto,
+  StoreWebResponseDto,
+  UpdateStoreDto,
+} from '@lib/stores'
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { GeocodingService } from './services/geocoding/geocoding.service'
 import { S3Service } from './services/s3/s3.service'
+import { StoreMapperService } from './services/store-mapper/store-mapper.service'
 
 @Injectable()
 export class StoresService {
@@ -48,14 +56,20 @@ export class StoresService {
   constructor(
     private s3Service: S3Service,
     private geoService: GeocodingService,
+    private mapper: StoreMapperService,
   ) {}
 
   findAll(): Promise<Store[]> {
     throw new Error('Method not implemented.')
   }
 
-  findOne(id: string): Promise<Store | null> {
-    throw new Error('Method not implemented.')
+  findOne(id: string): Promise<StoreWebResponseDto | null> {
+    const store = this.stores.find((store) => store.id === id)
+
+    console.log('find: ' + store)
+    const dto = this.mapper.toWebResponse(store)
+
+    return dto
   }
 
   findByUserId(userId: string): Promise<StoreSummaryDto>[] {
@@ -63,7 +77,7 @@ export class StoresService {
     return stores
   }
 
-  async create(fileData, storeData: CreateStoreDto): Promise<{ status: HttpStatus; store: Store }> {
+  async create(fileData, storeData: CreateStoreDto): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
     console.log(typeof storeData)
     const imageKey = await this.s3Service.uploadFile(fileData)
     const { latitude, longitude } = await this.geoService.getCoordinates(storeData.address)
@@ -80,8 +94,9 @@ export class StoresService {
     }
 
     this.stores.push(newStore)
+    const dto = await this.findOne(newStore.id)
 
-    return { status: HttpStatus.CREATED, store: newStore }
+    return { status: HttpStatus.CREATED, store: dto }
   }
 
   update(id: string, dto: UpdateStoreDto): Promise<Store | null> {
@@ -97,8 +112,13 @@ export class StoresService {
   }
 
   private async mapStoreToSummary(store: Store): Promise<StoreSummaryDto> {
-    const picture_url: string = await this.s3Service.getImageUrl(store.pricture_key)
+    const picture_url: string = await this.getImageUrl(store.pricture_key)
 
     return { id: store.id, user_id: store.user_id, cnpj: store.cnpj, name: store.name, picture_url: picture_url }
+  }
+
+  private async getImageUrl(key: string): Promise<string> {
+    const url = await this.s3Service.getImageUrl(key)
+    return url
   }
 }

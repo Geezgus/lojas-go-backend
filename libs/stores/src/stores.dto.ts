@@ -22,6 +22,14 @@ export class CreateStoreDto {
 
 export type StoreSummaryDto = { id: string; user_id: string; cnpj: string; name: string; picture_url: string }
 
+export class StoreWebResponseDto {
+  id: string
+  cnpj: string
+  name: string
+  picture_url: string
+  address: Address
+}
+
 export type UpdateStoreDto = CreateStoreDto
 
 export type PartialUpdateStoreDto = Partial<UpdateStoreDto>
