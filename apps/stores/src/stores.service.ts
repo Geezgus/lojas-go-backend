@@ -1,5 +1,6 @@
 import { CreateStoreDto, PartialUpdateStoreDto, Store, StoreSummaryDto, UpdateStoreDto } from '@lib/stores'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { GeocodingService } from './services/geocoding/geocoding.service'
 import { S3Service } from './services/s3/s3.service'
 
 @Injectable()
@@ -44,7 +45,10 @@ export class StoresService {
     },
   ]
 
-  constructor(private s3Service: S3Service) {}
+  constructor(
+    private s3Service: S3Service,
+    private geoService: GeocodingService,
+  ) {}
 
   findAll(): Promise<Store[]> {
     throw new Error('Method not implemented.')
@@ -59,14 +63,26 @@ export class StoresService {
     return stores
   }
 
-  async create(fileData, storeData: CreateStoreDto): Promise<string> {
+  async create(fileData, storeData: CreateStoreDto): Promise<{ status: HttpStatus; store: Store }> {
+    console.log(typeof storeData)
     const imageKey = await this.s3Service.uploadFile(fileData)
+    const { latitude, longitude } = await this.geoService.getCoordinates(storeData.address)
 
-    return Promise.resolve(imageKey)
+    const newStore: Store = {
+      id: (this.stores.length + 1).toString(),
+      user_id: storeData.user_id,
+      cnpj: storeData.cnpj,
+      name: storeData.name,
+      pricture_key: imageKey,
+      latitude: latitude,
+      longitude: longitude,
+      address: storeData.address,
+    }
+
+    this.stores.push(newStore)
+
+    return { status: HttpStatus.CREATED, store: newStore }
   }
-  // create(dto: CreateStoreDto): Promise<Store> {
-  //   throw new Error('Method not implemented.')
-  // }
 
   update(id: string, dto: UpdateStoreDto): Promise<Store | null> {
     throw new Error('Method not implemented.')

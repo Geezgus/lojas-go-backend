@@ -1,4 +1,4 @@
-import { PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
+import { CreateStoreDto, PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { StoresService } from './stores.service'
@@ -24,12 +24,9 @@ export class StoresController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  create(@UploadedFile() file: Express.Multer.File) {
-    return this.storesService.create(file)
+  create(@UploadedFile() file: Express.Multer.File, @Body() data: CreateStoreDto) {
+    return this.storesService.create(file, data)
   }
-  // create(@Body() data: CreateStoreDto) {
-  //   return this.storesService.create(data)
-  // }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() data: UpdateStoreDto) {

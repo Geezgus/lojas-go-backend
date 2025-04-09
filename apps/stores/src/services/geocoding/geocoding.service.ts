@@ -9,7 +9,7 @@ export class GeocodingService {
   async getCoordinates(address: Address): Promise<{ latitude: number; longitude: number }> {
     const url = this.buildGeocodingUrl(address)
     const response = await this.httpService.get(url).toPromise()
-    const location = response.data[0].geometry.location
+    const location = response.data.results[0].geometry.location
     const { lat, lng } = location
 
     return { latitude: lat, longitude: lng }

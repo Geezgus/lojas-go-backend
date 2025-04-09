@@ -1,5 +1,5 @@
-import { CreateStoreDto, PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
-import { Body, Controller } from '@nestjs/common'
+import { PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
+import { Controller } from '@nestjs/common'
 import { MessagePattern, Payload } from '@nestjs/microservices'
 import { StoresService } from './stores.service'
 
@@ -24,19 +24,21 @@ export class StoresController {
 
   @MessagePattern('STORES:CREATE')
   create(
-    @Payload() fileData: { buffer: string; originalname: string; mimetype: string },
-    @Body() { storeData }: { storeData: CreateStoreDto },
+    @Payload()
+    payload: {
+      fileData: { buffer: string; originalname: string; mimetype: string }
+      storeData: string
+    },
   ) {
+    const storeData = JSON.parse(payload.storeData)
+
     const imageData = {
-      buffer: Buffer.from(fileData.buffer, 'base64'),
-      originalname: fileData.originalname,
-      mimetype: fileData.mimetype,
+      buffer: Buffer.from(payload.fileData.buffer, 'base64'),
+      originalname: payload.fileData.originalname,
+      mimetype: payload.fileData.mimetype,
     }
     return this.storesService.create(imageData, storeData)
   }
-  // create(@Payload() { data }: { data: CreateStoreDto }) {
-  //   return this.storesService.create(data)
-  // }
 
   @MessagePattern('STORES:UPDATE')
   update(@Payload() { id, data }: { id: string; data: UpdateStoreDto }) {

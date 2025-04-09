@@ -1,14 +1,23 @@
-export type CreateStoreDto = {
+import { Type } from 'class-transformer'
+import { IsNotEmpty, IsString, ValidateNested } from 'class-validator'
+import { Address } from './stores.entity'
+
+export class CreateStoreDto {
+  @IsNotEmpty()
+  @IsString()
   user_id: string
+
+  @IsNotEmpty()
+  @IsString()
   name: string
+
+  @IsNotEmpty()
+  @IsString()
   cnpj: string
-  postalCode: string
-  street: string
-  number: string
-  complement: string
-  neighborhood: string
-  city: string
-  stateCode: string
+
+  @ValidateNested()
+  @Type(() => Address)
+  address: Address
 }
 
 export type StoreSummaryDto = { id: string; user_id: string; cnpj: string; name: string; picture_url: string }
