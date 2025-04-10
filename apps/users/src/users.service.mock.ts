@@ -1,5 +1,5 @@
-import { CreateUserDto, PartialUpdateUserDto, UpdateUserDto } from '@lib/users/users.dto'
 import { User } from '@lib/users'
+import { CreateUserDto, PartialUpdateUserDto, UpdateUserDto } from '@lib/users/users.dto'
 import { Injectable } from '@nestjs/common'
 
 @Injectable()
@@ -15,7 +15,6 @@ export class UsersServiceMock {
 
   findOne(id: string): Promise<User | null> {
     const user = this.users.find((user) => user.id === id) || null
-    console.log(this.users)
     return Promise.resolve(user)
   }
 

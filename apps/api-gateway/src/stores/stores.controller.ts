@@ -1,5 +1,17 @@
 import { CreateStoreDto, PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UploadedFile, UseInterceptors } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { StoresService } from './stores.service'
 
@@ -8,18 +20,16 @@ export class StoresController {
   constructor(private readonly storesService: StoresService) {}
 
   @Get()
-  findAll() {
+  findAll(@Query('userId') userId: string) {
+    if (userId) {
+      return this.storesService.findByUserId(userId)
+    }
     return this.storesService.findAll()
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.storesService.findOne(id)
-  }
-
-  @Get('/user/:userId')
-  findByUserId(@Param('userId') id: string) {
-    return this.storesService.findByUserId(id)
   }
 
   @Post()

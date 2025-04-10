@@ -20,7 +20,7 @@ export class StoresService {
       user_id: '1',
       cnpj: '12345678000123',
       name: 'Empresa A',
-      pricture_key: 'stores/364979.png',
+      pricture_key: 'stores/364981 (1).png',
       latitude: -23.5505,
       longitude: -46.6333,
       address: {
@@ -38,7 +38,7 @@ export class StoresService {
       user_id: '1',
       cnpj: '98765432000198',
       name: 'Empresa B',
-      pricture_key: 'stores/364981 (1).png',
+      pricture_key: 'stores/364979.png',
       latitude: -23.5505,
       longitude: -46.6333,
       address: {
@@ -66,19 +66,19 @@ export class StoresService {
   findOne(id: string): Promise<StoreWebResponseDto | null> {
     const store = this.stores.find((store) => store.id === id)
 
-    console.log('find: ' + store)
     const dto = this.mapper.toWebResponse(store)
 
     return dto
   }
 
-  findByUserId(userId: string): Promise<StoreSummaryDto>[] {
-    const stores = this.stores.filter((store) => store.user_id === userId).map((store) => this.mapStoreToSummary(store))
+  async findByUserId(userId: string): Promise<StoreSummaryDto[]> {
+    const stores = await Promise.all(
+      this.stores.filter((store) => store.user_id === userId).map((store) => this.mapStoreToSummary(store)),
+    )
     return stores
   }
 
   async create(fileData, storeData: CreateStoreDto): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
-    console.log(typeof storeData)
     const imageKey = await this.s3Service.uploadFile(fileData)
     const { latitude, longitude } = await this.geoService.getCoordinates(storeData.address)
 
