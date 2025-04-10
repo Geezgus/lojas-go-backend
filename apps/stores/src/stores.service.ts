@@ -79,7 +79,7 @@ export class StoresService {
   }
 
   async create(fileData, storeData: CreateStoreDto): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
-    const imageKey = await this.s3Service.uploadFile(fileData)
+    const imageKey = await this.s3Service.uploadFile(fileData, storeData.cnpj)
     const { latitude, longitude } = await this.geoService.getCoordinates(storeData.address)
 
     const newStore: Store = {

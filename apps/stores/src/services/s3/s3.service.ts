@@ -12,10 +12,10 @@ export class S3Service {
     signatureVersion: 'v4',
   })
 
-  async uploadFile(file) {
+  async uploadFile(file, name) {
     const params = {
       Bucket: this.AWS_S3_BUCKET,
-      Key: 'stores/' + file.originalname,
+      Key: 'stores/' + name,
       Body: file.buffer,
       ContentType: file.mimetype,
     }
