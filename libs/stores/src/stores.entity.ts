@@ -50,7 +50,7 @@ export class Store {
 
   @IsNotEmpty()
   @IsString()
-  pricture_key: string
+  picture_key: string
 
   @ValidateNested()
   @Type(() => Address)

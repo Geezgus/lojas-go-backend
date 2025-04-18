@@ -1,4 +1,4 @@
-import { PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
+import { PartialUpdateStoreDto } from '@lib/stores'
 import { Controller } from '@nestjs/common'
 import { MessagePattern, Payload } from '@nestjs/microservices'
 import { StoresService } from './stores.service'
@@ -31,17 +31,25 @@ export class StoresController {
     },
   ) {
     const storeData = JSON.parse(payload.data)
-    const imageData = {
-      buffer: Buffer.from(payload.fileData.buffer, 'base64'),
-      originalname: payload.fileData.originalname,
-      mimetype: payload.fileData.mimetype,
-    }
+    const imageData = this.getImageData(payload.fileData)
     return this.storesService.create(imageData, storeData)
   }
 
   @MessagePattern('STORES:UPDATE')
-  update(@Payload() { id, data }: { id: string; data: UpdateStoreDto }) {
-    return this.storesService.update(id, data)
+  update(
+    @Payload()
+    payload: {
+      id: string
+      file: { buffer: string; originalname: string; mimetype: string }
+      data: string
+    },
+  ) {
+    const storeData = JSON.parse(payload.data)
+    let imageData = undefined
+    if (payload.file) {
+      imageData = this.getImageData(payload.file)
+    }
+    return this.storesService.update(payload.id, imageData, storeData)
   }
 
   @MessagePattern('STORES:PARTIAL_UPDATE')
@@ -52,5 +60,13 @@ export class StoresController {
   @MessagePattern('STORES:DELETE')
   delete(@Payload() { id }: { id: string }) {
     return this.storesService.delete(id)
+  }
+
+  private getImageData(fileData: { buffer: string; originalname: string; mimetype: string }) {
+    return {
+      buffer: Buffer.from(fileData.buffer, 'base64'),
+      originalname: fileData.originalname,
+      mimetype: fileData.mimetype,
+    }
   }
 }

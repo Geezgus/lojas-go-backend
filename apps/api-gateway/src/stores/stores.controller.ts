@@ -39,8 +39,9 @@ export class StoresController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() data: UpdateStoreDto) {
-    return this.storesService.update(id, data)
+  @UseInterceptors(FileInterceptor('file'))
+  async update(@Param('id') id: string, @UploadedFile() file: Express.Multer.File, @Body('data') data: UpdateStoreDto) {
+    return this.storesService.update(id, file, data)
   }
 
   @Patch(':id')

@@ -7,7 +7,7 @@ export class StoreMapperService {
   constructor(private s3Service: S3Service) {}
 
   async toWebResponse(store: Store): Promise<StoreWebResponseDto> {
-    const imageUrl = await this.s3Service.getImageUrl(store.pricture_key)
+    const imageUrl = await this.s3Service.getImageUrl(store.picture_key)
     return {
       id: store.id,
       cnpj: store.cnpj,

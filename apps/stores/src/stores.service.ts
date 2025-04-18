@@ -1,4 +1,5 @@
 import {
+  Address,
   CreateStoreDto,
   PartialUpdateStoreDto,
   Store,
@@ -6,7 +7,8 @@ import {
   StoreWebResponseDto,
   UpdateStoreDto,
 } from '@lib/stores'
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common'
+import { isEqual } from 'lodash'
 import { GeocodingService } from './services/geocoding/geocoding.service'
 import { S3Service } from './services/s3/s3.service'
 import { StoreMapperService } from './services/store-mapper/store-mapper.service'
@@ -20,7 +22,7 @@ export class StoresService {
       user_id: '1',
       cnpj: '12345678000123',
       name: 'Empresa A',
-      pricture_key: 'stores/364981 (1).png',
+      picture_key: 'stores/364981 (1).png',
       latitude: -23.5505,
       longitude: -46.6333,
       address: {
@@ -38,7 +40,7 @@ export class StoresService {
       user_id: '1',
       cnpj: '98765432000198',
       name: 'Empresa B',
-      pricture_key: 'stores/364979.png',
+      picture_key: 'stores/364979.png',
       latitude: -23.5505,
       longitude: -46.6333,
       address: {
@@ -66,6 +68,10 @@ export class StoresService {
   findOne(id: string): Promise<StoreWebResponseDto | null> {
     const store = this.stores.find((store) => store.id === id)
 
+    if (!store) {
+      throw new NotFoundException(`Store with id ${id} not found`)
+    }
+
     const dto = this.mapper.toWebResponse(store)
 
     return dto
@@ -87,7 +93,7 @@ export class StoresService {
       user_id: storeData.user_id,
       cnpj: storeData.cnpj,
       name: storeData.name,
-      pricture_key: imageKey,
+      picture_key: imageKey,
       latitude: latitude,
       longitude: longitude,
       address: storeData.address,
@@ -99,8 +105,29 @@ export class StoresService {
     return { status: HttpStatus.CREATED, store: dto }
   }
 
-  update(id: string, dto: UpdateStoreDto): Promise<Store | null> {
-    throw new Error('Method not implemented.')
+  async update(id: string, file, data: UpdateStoreDto): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
+    const business: Store = this.stores.find((store) => store.id === id)
+
+    if (!business) {
+      throw new NotFoundException(`Store with CNPJ ${data.cnpj} not found`)
+    }
+
+    let picture_key: string | undefined = await this.updateImage(file, data.cnpj)
+    const [latitude, longitude] = await this.updateGeoPoints(business.address, data.address)
+
+    const updatedBusiness: Store = {
+      ...business,
+      ...data,
+      ...(picture_key && { picture_key }),
+      ...(latitude !== undefined && { latitude }),
+      ...(longitude !== undefined && { longitude }),
+    }
+
+    let index = this.stores.indexOf(business)
+    this.stores[index] = updatedBusiness
+
+    const webDto = await this.mapToWebDTO(updatedBusiness)
+    return { status: HttpStatus.ACCEPTED, store: webDto }
   }
 
   partialUpdate(id: string, dto: PartialUpdateStoreDto): Promise<Store | null> {
@@ -112,13 +139,43 @@ export class StoresService {
   }
 
   private async mapStoreToSummary(store: Store): Promise<StoreSummaryDto> {
-    const picture_url: string = await this.getImageUrl(store.pricture_key)
+    const picture_url: string = await this.getImageUrl(store.picture_key)
 
     return { id: store.id, user_id: store.user_id, cnpj: store.cnpj, name: store.name, picture_url: picture_url }
+  }
+
+  private async mapToWebDTO(store: Store): Promise<StoreWebResponseDto> {
+    const picture_url: string = await this.getImageUrl(store.picture_key)
+
+    return { id: store.id, cnpj: store.cnpj, name: store.name, picture_url: picture_url, address: store.address }
   }
 
   private async getImageUrl(key: string): Promise<string> {
     const url = await this.s3Service.getImageUrl(key)
     return url
+  }
+
+  private async updateImage(file, cnpj): Promise<string | undefined> {
+    if (file) {
+      const uploadResult = await this.s3Service.uploadFile(file, cnpj)
+      return uploadResult
+    }
+    return undefined
+  }
+
+  private async updateGeoPoints(
+    currentAddress: Address,
+    newAddress: Address,
+  ): Promise<[number | undefined, number | undefined]> {
+    let latitude: number | undefined = undefined
+    let longitude: number | undefined = undefined
+
+    if (!isEqual(currentAddress, newAddress)) {
+      const coordinates = await this.geoService.getCoordinates(newAddress)
+      latitude = coordinates.latitude
+      longitude = coordinates.longitude
+    }
+
+    return [latitude, latitude]
   }
 }

@@ -1,4 +1,4 @@
-import { CreateStoreDto, PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores/stores.dto'
+import { CreateStoreDto, PartialUpdateStoreDto } from '@lib/stores/stores.dto'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 
@@ -27,8 +27,8 @@ export class StoresService {
     return this.storesClient.send('STORES:CREATE', { fileData, ...data })
   }
 
-  update(id: string, data: UpdateStoreDto) {
-    return this.storesClient.send('STORES:UPDATE', { id, data })
+  update(id: string, file: Express.Multer.File, data: PartialUpdateStoreDto) {
+    return this.storesClient.send('STORES:UPDATE', { id, file, data })
   }
 
   partialUpdate(id: string, data: PartialUpdateStoreDto) {
