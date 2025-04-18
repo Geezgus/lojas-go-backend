@@ -1,5 +1,4 @@
 import {
-  Address,
   CreateStoreDto,
   PartialUpdateStoreDto,
   Store,
@@ -7,8 +6,11 @@ import {
   StoreWebResponseDto,
   UpdateStoreDto,
 } from '@lib/stores'
+import { Address } from '@lib/stores/address.entity'
 import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
 import { isEqual } from 'lodash'
+import { Repository } from 'typeorm'
 import { GeocodingService } from './services/geocoding/geocoding.service'
 import { S3Service } from './services/s3/s3.service'
 import { StoreMapperService } from './services/store-mapper/store-mapper.service'
@@ -26,6 +28,7 @@ export class StoresService {
       latitude: -23.5505,
       longitude: -46.6333,
       address: {
+        id: 'aa',
         street: 'Rua A',
         number: '123',
         complement: 'Apto 101',
@@ -44,6 +47,7 @@ export class StoresService {
       latitude: -23.5505,
       longitude: -46.6333,
       address: {
+        id: 'bb',
         street: 'Rua B',
         number: '456',
         complement: 'Sala 202',
@@ -59,14 +63,18 @@ export class StoresService {
     private s3Service: S3Service,
     private geoService: GeocodingService,
     private mapper: StoreMapperService,
+
+    @InjectRepository(Store)
+    private storesRepository: Repository<Store>,
   ) {}
 
   findAll(): Promise<Store[]> {
-    throw new Error('Method not implemented.')
+    return this.storesRepository.find()
   }
 
-  findOne(id: string): Promise<StoreWebResponseDto | null> {
-    const store = this.stores.find((store) => store.id === id)
+  async findOne(id: string): Promise<StoreWebResponseDto | null> {
+    const store = await this.storesRepository.findOneBy({ id })
+    // const store = this.stores.find((store) => store.id === id)
 
     if (!store) {
       throw new NotFoundException(`Store with id ${id} not found`)
@@ -88,8 +96,7 @@ export class StoresService {
     const imageKey = await this.s3Service.uploadFile(fileData, storeData.cnpj)
     const { latitude, longitude } = await this.geoService.getCoordinates(storeData.address)
 
-    const newStore: Store = {
-      id: (this.stores.length + 1).toString(),
+    let newStore: Store = {
       user_id: storeData.user_id,
       cnpj: storeData.cnpj,
       name: storeData.name,
@@ -99,8 +106,8 @@ export class StoresService {
       address: storeData.address,
     }
 
-    this.stores.push(newStore)
-    const dto = await this.findOne(newStore.id)
+    newStore = await this.storesRepository.save(newStore)
+    const dto = await this.mapper.mapToWebDto(newStore)
 
     return { status: HttpStatus.CREATED, store: dto }
   }

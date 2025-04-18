@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer'
 import { IsNotEmpty, IsString, ValidateNested } from 'class-validator'
-import { Address } from './stores.entity'
+import { Address } from './address.entity'
 
 export class CreateStoreDto {
   @IsNotEmpty()

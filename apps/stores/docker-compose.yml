@@ -1,0 +1,14 @@
+services:
+  stores-db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    volumes:
+      - stores-data:/var/lib/postgresql/data
+
+volumes:
+  stores-data:
