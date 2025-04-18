@@ -72,14 +72,14 @@ export class StoresService {
       throw new NotFoundException(`Store with id ${id} not found`)
     }
 
-    const dto = this.mapper.toWebResponse(store)
+    const dto = this.mapper.mapToWebDto(store)
 
     return dto
   }
 
   async findByUserId(userId: string): Promise<StoreSummaryDto[]> {
     const stores = await Promise.all(
-      this.stores.filter((store) => store.user_id === userId).map((store) => this.mapStoreToSummary(store)),
+      this.stores.filter((store) => store.user_id === userId).map((store) => this.mapper.mapToSummary(store)),
     )
     return stores
   }
@@ -126,7 +126,7 @@ export class StoresService {
     let index = this.stores.indexOf(business)
     this.stores[index] = updatedBusiness
 
-    const webDto = await this.mapToWebDTO(updatedBusiness)
+    const webDto = await this.mapper.mapToWebDto(updatedBusiness)
     return { status: HttpStatus.ACCEPTED, store: webDto }
   }
 
@@ -136,23 +136,6 @@ export class StoresService {
 
   delete(id: string): Promise<Store | null> {
     throw new Error('Method not implemented.')
-  }
-
-  private async mapStoreToSummary(store: Store): Promise<StoreSummaryDto> {
-    const picture_url: string = await this.getImageUrl(store.picture_key)
-
-    return { id: store.id, user_id: store.user_id, cnpj: store.cnpj, name: store.name, picture_url: picture_url }
-  }
-
-  private async mapToWebDTO(store: Store): Promise<StoreWebResponseDto> {
-    const picture_url: string = await this.getImageUrl(store.picture_key)
-
-    return { id: store.id, cnpj: store.cnpj, name: store.name, picture_url: picture_url, address: store.address }
-  }
-
-  private async getImageUrl(key: string): Promise<string> {
-    const url = await this.s3Service.getImageUrl(key)
-    return url
   }
 
   private async updateImage(file, cnpj): Promise<string | undefined> {
