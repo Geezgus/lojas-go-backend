@@ -1,6 +1,7 @@
 import { CreateStoreDto, PartialUpdateStoreDto } from '@lib/stores/stores.dto'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpException, Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
+import { catchError } from 'rxjs'
 
 @Injectable()
 export class StoresService {
@@ -24,7 +25,11 @@ export class StoresService {
       originalname: file.originalname,
       mimetype: file.mimetype,
     }
-    return this.storesClient.send('STORES:CREATE', { fileData, ...data })
+    return this.storesClient.send('STORES:CREATE', { fileData, ...data }).pipe(
+      catchError((error: any) => {
+        throw new HttpException(error.message, error.status)
+      }),
+    )
   }
 
   update(id: string, file: Express.Multer.File, data: PartialUpdateStoreDto) {

@@ -7,7 +7,8 @@ import {
   UpdateStoreDto,
 } from '@lib/stores'
 import { Address } from '@lib/stores/address.entity'
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common'
+import { ConflictException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common'
+import { RpcException } from '@nestjs/microservices'
 import { InjectRepository } from '@nestjs/typeorm'
 import { isEqual } from 'lodash'
 import { Repository } from 'typeorm'
@@ -17,48 +18,6 @@ import { StoreMapperService } from './services/store-mapper/store-mapper.service
 
 @Injectable()
 export class StoresService {
-  // Mocked data for demonstration purposes
-  private stores: Store[] = [
-    {
-      id: '1',
-      user_id: '1',
-      cnpj: '12345678000123',
-      name: 'Empresa A',
-      picture_key: 'stores/364981 (1).png',
-      latitude: -23.5505,
-      longitude: -46.6333,
-      address: {
-        id: 'aa',
-        street: 'Rua A',
-        number: '123',
-        complement: 'Apto 101',
-        neighborhood: 'Centro',
-        city: 'São Paulo',
-        stateCode: 'SP',
-        postalCode: '01000000',
-      },
-    },
-    {
-      id: '2',
-      user_id: '1',
-      cnpj: '98765432000198',
-      name: 'Empresa B',
-      picture_key: 'stores/364979.png',
-      latitude: -23.5505,
-      longitude: -46.6333,
-      address: {
-        id: 'bb',
-        street: 'Rua B',
-        number: '456',
-        complement: 'Sala 202',
-        neighborhood: 'Jardins',
-        city: 'São Paulo',
-        stateCode: 'SP',
-        postalCode: '01400000',
-      },
-    },
-  ]
-
   constructor(
     private s3Service: S3Service,
     private geoService: GeocodingService,
@@ -72,27 +31,37 @@ export class StoresService {
     return this.storesRepository.find()
   }
 
-  async findOne(id: string): Promise<StoreWebResponseDto | null> {
-    const store = await this.storesRepository.findOneBy({ id })
-    // const store = this.stores.find((store) => store.id === id)
+  async findOneEntity(id: string): Promise<Store | null> {
+    const store = await this.storesRepository.findOneBy({ id: id })
 
     if (!store) {
-      throw new NotFoundException(`Store with id ${id} not found`)
+      throw new RpcException(new NotFoundException('Loja nao encontrada'))
     }
 
+    return store
+  }
+
+  async findOneWeb(id: string): Promise<StoreWebResponseDto | null> {
+    const store = await this.findOneEntity(id)
     const dto = this.mapper.mapToWebDto(store)
 
     return dto
   }
 
   async findByUserId(userId: string): Promise<StoreSummaryDto[]> {
-    const stores = await Promise.all(
-      this.stores.filter((store) => store.user_id === userId).map((store) => this.mapper.mapToSummary(store)),
+    const stores = Promise.all(
+      (await this.storesRepository.findBy({ user_id: userId })).map((store: Store) => this.mapper.mapToSummary(store)),
     )
+
     return stores
   }
 
-  async create(fileData, storeData: CreateStoreDto): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
+  async create(
+    fileData: Express.Multer.File,
+    storeData: CreateStoreDto,
+  ): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
+    await this.existingCNPJ(storeData.cnpj)
+
     const imageKey = await this.s3Service.uploadFile(fileData, storeData.cnpj)
     const { latitude, longitude } = await this.geoService.getCoordinates(storeData.address)
 
@@ -113,16 +82,17 @@ export class StoresService {
   }
 
   async update(id: string, file, data: UpdateStoreDto): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
-    const business: Store = this.stores.find((store) => store.id === id)
-
-    if (!business) {
-      throw new NotFoundException(`Store with CNPJ ${data.cnpj} not found`)
+    if (data.cnpj) {
+      await this.existingCNPJ(data.cnpj)
     }
+
+    const business = await this.findOneEntity(id)
 
     let picture_key: string | undefined = await this.updateImage(file, data.cnpj)
     const [latitude, longitude] = await this.updateGeoPoints(business.address, data.address)
 
-    const updatedBusiness: Store = {
+    let updatedBusiness: Store = {
+      id: id,
       ...business,
       ...data,
       ...(picture_key && { picture_key }),
@@ -130,8 +100,7 @@ export class StoresService {
       ...(longitude !== undefined && { longitude }),
     }
 
-    let index = this.stores.indexOf(business)
-    this.stores[index] = updatedBusiness
+    updatedBusiness = await this.storesRepository.save(updatedBusiness)
 
     const webDto = await this.mapper.mapToWebDto(updatedBusiness)
     return { status: HttpStatus.ACCEPTED, store: webDto }
@@ -143,6 +112,14 @@ export class StoresService {
 
   delete(id: string): Promise<Store | null> {
     throw new Error('Method not implemented.')
+  }
+
+  private async existingCNPJ(cnpj: string) {
+    const result = await this.storesRepository.findBy({ cnpj: cnpj })
+
+    if (result) {
+      throw new RpcException(new ConflictException('Dados duplicados encontrados. Este registro já existe.'))
+    }
   }
 
   private async updateImage(file, cnpj): Promise<string | undefined> {
@@ -166,6 +143,6 @@ export class StoresService {
       longitude = coordinates.longitude
     }
 
-    return [latitude, latitude]
+    return [latitude, longitude]
   }
 }
