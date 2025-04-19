@@ -1,3 +1,26 @@
-export type User = { id: string; name: string; email: string; sub: string; stores: Store[] }
+import { IsNotEmpty, IsString } from 'class-validator'
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm'
 
-type Store = { cnpj: string; name: string; logo: string }
+@Entity()
+@Unique(['sub'])
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  @IsNotEmpty()
+  @IsString()
+  id: string
+
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  name: string
+
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  email: string
+
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  sub: string
+}

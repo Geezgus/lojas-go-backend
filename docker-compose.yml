@@ -2,13 +2,25 @@ services:
   stores-db:
     image: postgres:14
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_STORES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - '${POSTGRES_PORT}:5432'
+      - '${POSTGRES_STORES_PORT}:5432'
     volumes:
       - stores-data:/var/lib/postgresql/data
 
+  users-db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ${POSTGRES_USERS_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '${POSTGRES_USERS_PORT}:5432'
+    volumes:
+      - users-data:/var/lib/postgresql/data
+
 volumes:
   stores-data:
+  users-data:

@@ -22,8 +22,8 @@ import { StoresService } from './stores.service'
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<number>('POSTGRES_PORT'),
-        database: configService.get<string>('POSTGRES_DB'),
+        port: configService.get<number>('POSTGRES_STORES_PORT'),
+        database: configService.get<string>('POSTGRES_STORES_DB'),
         username: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
         entities: [Store, Address],
