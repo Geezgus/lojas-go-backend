@@ -27,8 +27,8 @@ export class StoresService {
     private storesRepository: Repository<Store>,
   ) {}
 
-  findAll(): Promise<Store[]> {
-    return this.storesRepository.find()
+  async findAll(): Promise<Store[]> {
+    return await this.storesRepository.find()
   }
 
   async findOneEntity(id: string): Promise<Store | null> {
@@ -56,10 +56,7 @@ export class StoresService {
     return stores
   }
 
-  async create(
-    fileData: Express.Multer.File,
-    storeData: CreateStoreDto,
-  ): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
+  async create(fileData, storeData: CreateStoreDto): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
     await this.existingCNPJ(storeData.cnpj)
 
     const imageKey = await this.s3Service.uploadFile(fileData, storeData.cnpj)
@@ -110,8 +107,11 @@ export class StoresService {
     throw new Error('Method not implemented.')
   }
 
-  delete(id: string): Promise<Store | null> {
-    throw new Error('Method not implemented.')
+  async delete(id: string): Promise<{ status: HttpStatus; store: Store }> {
+    const store = await this.findOneEntity(id)
+    this.storesRepository.remove(store)
+
+    return { status: HttpStatus.ACCEPTED, store: store }
   }
 
   private async existingCNPJ(cnpj: string) {

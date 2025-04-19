@@ -14,7 +14,7 @@ export class StoresController {
 
   @MessagePattern('STORES:FIND_ONE')
   findOne(@Payload() { id }: { id: string }) {
-    return this.storesService.findOne(id)
+    return this.storesService.findOneWeb(id)
   }
 
   @MessagePattern('STORES:FIND_BY_USER_ID')
