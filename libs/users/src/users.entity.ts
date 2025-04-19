@@ -7,7 +7,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   @IsNotEmpty()
   @IsString()
-  id: string
+  id?: string
 
   @Column()
   @IsNotEmpty()

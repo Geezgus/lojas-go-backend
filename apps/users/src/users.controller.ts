@@ -24,7 +24,7 @@ export class UsersController {
 
   @MessagePattern('USERS:AUTH')
   autenticate(@Payload() { data }: { data: CreateUserDto }) {
-    return this.usersService.verifyAndCreateIfNeeded(data)
+    return this.usersService.login(data)
   }
 
   @MessagePattern('USERS:UPDATE')
