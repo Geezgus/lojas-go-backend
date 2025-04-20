@@ -12,15 +12,14 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async login(dto: CreateUserDto): Promise<User> {
+  async login(dto: CreateUserDto): Promise<{ status: HttpStatus; user: User }> {
     const existingUser = await this.usersRepository.findOneBy({ sub: dto.sub })
 
-    console.log(existingUser)
     if (!existingUser) {
       return this.create(dto)
     }
 
-    return existingUser
+    return { status: HttpStatus.ACCEPTED, user: existingUser }
   }
 
   async findAll(): Promise<User[]> {

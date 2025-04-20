@@ -1,11 +1,4 @@
-import {
-  CreateStoreDto,
-  PartialUpdateStoreDto,
-  Store,
-  StoreSummaryDto,
-  StoreWebResponseDto,
-  UpdateStoreDto,
-} from '@lib/stores'
+import { CreateStoreDto, PartialUpdateStoreDto, Store, StoreSummaryDto, StoreWebResponseDto } from '@lib/stores'
 import { Address } from '@lib/stores/address.entity'
 import { ConflictException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common'
 import { RpcException } from '@nestjs/microservices'
@@ -28,11 +21,24 @@ export class StoresService {
   ) {}
 
   async findAll(): Promise<Store[]> {
-    return await this.storesRepository.find()
+    let response = await this.storesRepository.find({
+      relations: {
+        address: true,
+      },
+    })
+
+    return response
   }
 
   async findOneEntity(id: string): Promise<Store | null> {
-    const store = await this.storesRepository.findOneBy({ id: id })
+    const store = await this.storesRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: {
+        address: true,
+      },
+    })
 
     if (!store) {
       throw new RpcException(new NotFoundException('Loja nao encontrada'))
@@ -50,7 +56,16 @@ export class StoresService {
 
   async findByUserId(userId: string): Promise<StoreSummaryDto[]> {
     const stores = Promise.all(
-      (await this.storesRepository.findBy({ user_id: userId })).map((store: Store) => this.mapper.mapToSummary(store)),
+      (
+        await this.storesRepository.find({
+          where: {
+            user_id: userId,
+          },
+          relations: {
+            address: true,
+          },
+        })
+      ).map((store: Store) => this.mapper.mapToSummary(store)),
     )
 
     return stores
@@ -78,7 +93,11 @@ export class StoresService {
     return { status: HttpStatus.CREATED, store: dto }
   }
 
-  async update(id: string, file, data: UpdateStoreDto): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
+  async update(
+    id: string,
+    file,
+    data: PartialUpdateStoreDto,
+  ): Promise<{ status: HttpStatus; store: StoreWebResponseDto }> {
     if (data.cnpj) {
       await this.existingCNPJ(data.cnpj)
     }
@@ -86,8 +105,11 @@ export class StoresService {
     const business = await this.findOneEntity(id)
 
     let picture_key: string | undefined = await this.updateImage(file, data.cnpj)
-    const [latitude, longitude] = await this.updateGeoPoints(business.address, data.address)
 
+    let [latitude, longitude] = [undefined, undefined]
+    if (data.address) {
+      ;[latitude, longitude] = await this.updateGeoPoints(business.address, data.address)
+    }
     let updatedBusiness: Store = {
       id: id,
       ...business,
@@ -116,8 +138,7 @@ export class StoresService {
 
   private async existingCNPJ(cnpj: string) {
     const result = await this.storesRepository.findBy({ cnpj: cnpj })
-
-    if (result) {
+    if (result.length > 0) {
       throw new RpcException(new ConflictException('Dados duplicados encontrados. Este registro já existe.'))
     }
   }

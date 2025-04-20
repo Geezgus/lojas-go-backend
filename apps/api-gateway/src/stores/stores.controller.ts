@@ -1,4 +1,4 @@
-import { CreateStoreDto, PartialUpdateStoreDto, UpdateStoreDto } from '@lib/stores'
+import { CreateStoreDto, PartialUpdateStoreDto } from '@lib/stores'
 import {
   Body,
   Controller,
@@ -40,7 +40,11 @@ export class StoresController {
 
   @Put(':id')
   @UseInterceptors(FileInterceptor('file'))
-  async update(@Param('id') id: string, @UploadedFile() file: Express.Multer.File, @Body('data') data: UpdateStoreDto) {
+  async update(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('data') data: PartialUpdateStoreDto,
+  ) {
     return this.storesService.update(id, file, data)
   }
 
