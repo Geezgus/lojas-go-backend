@@ -21,6 +21,18 @@ services:
     volumes:
       - users-data:/var/lib/postgresql/data
 
+  products-db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ${POSTGRES_PRODUCTS_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '${POSTGRES_PRODUCTS_PORT}:5432'
+    volumes:
+      - products-data:/var/lib/postgresql/data
+
 volumes:
   stores-data:
   users-data:
+  products-data:
