@@ -1,7 +1,8 @@
 import { Type } from 'class-transformer'
 import { IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator'
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Unique } from 'typeorm'
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from 'typeorm'
 import { Address } from './address.entity'
+import { Product } from './product.entity'
 
 @Entity()
 @Unique(['cnpj'])
@@ -46,4 +47,7 @@ export class Store {
   @ValidateNested()
   @Type(() => Address)
   address: Address
+
+  @OneToMany(() => Product, (product) => product.store, { cascade: true })
+  products?: Product[]
 }

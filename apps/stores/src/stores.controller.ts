@@ -1,11 +1,16 @@
 import { PartialUpdateStoreDto } from '@lib/stores'
+import { Product } from '@lib/stores/product.entity'
 import { Controller } from '@nestjs/common'
 import { MessagePattern, Payload } from '@nestjs/microservices'
+import { ProductService } from './services/product/product.service'
 import { StoresService } from './stores.service'
 
 @Controller()
 export class StoresController {
-  constructor(private readonly storesService: StoresService) {}
+  constructor(
+    private readonly storesService: StoresService,
+    private readonly productsService: ProductService,
+  ) {}
 
   @MessagePattern('STORES:FIND_ALL')
   findAll() {
@@ -60,6 +65,13 @@ export class StoresController {
   @MessagePattern('STORES:DELETE')
   delete(@Payload() { id }: { id: string }) {
     return this.storesService.delete(id)
+  }
+
+  @MessagePattern('STORES_PRODUCTS:ADD')
+  async addNewProduct(@Payload() { storeId, data }: { storeId: string; data: Partial<Product> }) {
+    const store = await this.storesService.findOneEntity(storeId)
+    const response = this.productsService.add(data, store)
+    return response
   }
 
   private getImageData(fileData: { buffer: string; originalname: string; mimetype: string }) {

@@ -1,4 +1,5 @@
 import { CreateStoreDto, PartialUpdateStoreDto } from '@lib/stores'
+import { Product } from '@lib/stores/product.entity'
 import {
   Body,
   Controller,
@@ -56,5 +57,10 @@ export class StoresController {
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.storesService.delete(id)
+  }
+
+  @Post(':storeId/products')
+  addNewProduct(@Param('storeId') storeId: string, @Body() data: Partial<Product>) {
+    return this.storesService.addNewProduct(storeId, data)
   }
 }

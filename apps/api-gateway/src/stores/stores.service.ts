@@ -1,3 +1,4 @@
+import { Product } from '@lib/stores/product.entity'
 import { CreateStoreDto, PartialUpdateStoreDto } from '@lib/stores/stores.dto'
 import { HttpException, Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
@@ -42,5 +43,13 @@ export class StoresService {
 
   delete(id: string) {
     return this.storesClient.send('STORES:DELETE', { id })
+  }
+
+  addNewProduct(storeId: string, data: Partial<Product>) {
+    return this.storesClient.send('STORES_PRODUCTS:ADD', { storeId, data }).pipe(
+      catchError((error: any) => {
+        throw new HttpException(error.message, error.status)
+      }),
+    )
   }
 }
