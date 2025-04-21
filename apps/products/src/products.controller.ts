@@ -1,12 +1,39 @@
-import { Controller, Get } from '@nestjs/common';
-import { ProductsService } from './products.service';
+import { Controller } from '@nestjs/common'
+import { MessagePattern, Payload } from '@nestjs/microservices'
+import { ProductsService } from './products.service'
 
 @Controller()
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Get()
-  getHello(): string {
-    return this.productsService.getHello();
+  @MessagePattern('PRODUCTS:FIND_ALL')
+  findAll() {
+    return this.productsService.findAll()
+  }
+
+  @MessagePattern('PRODUCTS:FIND_ONE')
+  findOne(@Payload() { id }: { id: string }) {
+    return this.productsService.findOne(id)
+  }
+
+  @MessagePattern('PRODUCTS:CREATE')
+  create(
+    @Payload()
+    payload: {
+      fileData: { buffer: string; originalname: string; mimetype: string }
+      data: string
+    },
+  ) {
+    const productData = JSON.parse(payload.data)
+    const imageData = this.getImageData(payload.fileData)
+    return this.productsService.create(imageData, productData)
+  }
+
+  private getImageData(fileData: { buffer: string; originalname: string; mimetype: string }) {
+    return {
+      buffer: Buffer.from(fileData.buffer, 'base64'),
+      originalname: fileData.originalname,
+      mimetype: fileData.mimetype,
+    }
   }
 }

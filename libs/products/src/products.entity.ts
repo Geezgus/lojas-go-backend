@@ -5,7 +5,7 @@ import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm'
 @Unique(['cod'])
 export class Product {
   @PrimaryGeneratedColumn('uuid')
-  id?: string
+  id: string
 
   @Column()
   @IsNotEmpty()
@@ -16,6 +16,11 @@ export class Product {
   @IsNotEmpty()
   @IsString()
   name: string
+
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  description: string
 
   @Column()
   @IsNotEmpty()
