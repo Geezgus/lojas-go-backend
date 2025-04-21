@@ -23,14 +23,29 @@ export class ProductsService {
   async findAllWeb(
     page = 1,
     limit = 20,
+    search?: string,
+    field?: string,
   ): Promise<{ data: ProductsDto[]; total: number; currentPage: number; totalPages: number }> {
-    // Busca com paginacao
+    // Construir query com base nos filtros
+    const queryBuilder = this.productRepository.createQueryBuilder('product')
+
+    if (search && field) {
+      if (field == 'code') {
+        queryBuilder.where('product.cod LIKE :search', { search: `${search}%` })
+      } else if (field == 'name') {
+        queryBuilder.where('product.name LIKE :search', { search: `${search}%` })
+      }
+    } else if (search) {
+      queryBuilder.where('product.cod LIKE :search OR product.name LIKE :search', { search: `%${search}%` })
+    }
+
+    // Adiciona paginacao
+    queryBuilder.skip((page - 1) * limit).take(limit)
+
+    // Executa query
     const [products, total] = await Promise.all([
-      this.productRepository.find({
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.productRepository.count(),
+      queryBuilder.getMany(),
+      search ? queryBuilder.getCount() : this.productRepository.count(),
     ])
 
     // Extrai todas as chaves de imagem
@@ -76,7 +91,6 @@ export class ProductsService {
 
   private async existingCODE(code: string) {
     const result = await this.productRepository.findBy({ cod: code })
-    console.log('result', result)
     if (result.length > 0) {
       throw new RpcException(new ConflictException('Dados duplicados encontrados. Este registro já existe.'))
     }

@@ -1,14 +1,10 @@
 import { Controller } from '@nestjs/common'
 import { MessagePattern, Payload } from '@nestjs/microservices'
 import { ProductsService } from './products.service'
-import { S3Service } from './s3/s3.service'
 
 @Controller()
 export class ProductsController {
-  constructor(
-    private readonly productsService: ProductsService,
-    private s3Service: S3Service,
-  ) {}
+  constructor(private readonly productsService: ProductsService) {}
 
   @MessagePattern('PRODUCTS:FIND_ALL')
   findAll() {
@@ -16,9 +12,9 @@ export class ProductsController {
   }
 
   @MessagePattern('PRODUCTS:FIND_ALL_WEB')
-  findAllWeb(@Payload() data: { page: number; limit: number }) {
-    const { page, limit } = data
-    return this.productsService.findAllWeb(page, limit)
+  findAllWeb(@Payload() data: { page: number; limit: number; search?: string; field?: string }) {
+    const { page, limit, search, field } = data
+    return this.productsService.findAllWeb(page, limit, search, field)
   }
 
   @MessagePattern('PRODUCTS:FIND_ONE')

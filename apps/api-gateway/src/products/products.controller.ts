@@ -3,6 +3,7 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Header,
   Param,
   ParseIntPipe,
   Post,
@@ -24,11 +25,14 @@ export class ProductsController {
   }
 
   @Get('web')
+  @Header('Content-Type', 'application/json')
   findAllWeb(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number = 20,
+    @Query('search') search?: string,
+    @Query('field') field?: string,
   ) {
-    return this.productsService.findAllWeb(page, limit)
+    return this.productsService.findAllWeb(page, limit, search, field)
   }
 
   @Get(':id')
