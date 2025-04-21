@@ -4,5 +4,5 @@ export class ProductsDto {
   code: string
   description: string
   price: number
-  imageUrl: string
+  picture_url: string
 }

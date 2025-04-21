@@ -36,4 +36,25 @@ export class S3Service {
 
     return signedUrl
   }
+
+  async getMultipleImageUrls(keys: string[]): Promise<Record<string, string>> {
+    const uniqueKeys = [...new Set(keys)].filter(Boolean)
+
+    const batchSize = 20
+    const results: Record<string, string> = {}
+
+    for (let i = 0; i < uniqueKeys.length; i += batchSize) {
+      const batch = uniqueKeys.slice(i, i + batchSize)
+      const batchPromises = batch.map(async (key) => {
+        return { key, url: await this.getImageUrl(key) }
+      })
+
+      const batchResults = await Promise.all(batchPromises)
+      batchResults.forEach(({ key, url }) => {
+        results[key] = url
+      })
+    }
+
+    return results
+  }
 }

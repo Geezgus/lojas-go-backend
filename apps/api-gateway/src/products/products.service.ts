@@ -11,6 +11,10 @@ export class ProductsService {
     return this.productsClient.send('PRODUCTS:FIND_ALL', {})
   }
 
+  findAllWeb(page: number, limit: number) {
+    return this.productsClient.send('PRODUCTS:FIND_ALL_WEB', { page, limit })
+  }
+
   findOne(id: string) {
     return this.productsClient.send('PRODUCTS:FIND_ONE', { id })
   }

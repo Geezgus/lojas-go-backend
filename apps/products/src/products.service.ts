@@ -1,6 +1,7 @@
 import { ConflictException, HttpStatus, Injectable } from '@nestjs/common'
 import { RpcException } from '@nestjs/microservices'
 import { InjectRepository } from '@nestjs/typeorm'
+import { ProductsDto } from 'libs/products/src/products.dto'
 import { Product } from 'libs/products/src/products.entity'
 import { Repository } from 'typeorm'
 import { S3Service } from './s3/s3.service'
@@ -17,6 +18,47 @@ export class ProductsService {
   async findAll(): Promise<Product[]> {
     const products = await this.productRepository.find()
     return products
+  }
+
+  async findAllWeb(
+    page = 1,
+    limit = 20,
+  ): Promise<{ data: ProductsDto[]; total: number; currentPage: number; totalPages: number }> {
+    // Busca com paginacao
+    const [products, total] = await Promise.all([
+      this.productRepository.find({
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.productRepository.count(),
+    ])
+
+    // Extrai todas as chaves de imagem
+    const imageKeys = products.map((product) => product.picture_key).filter(Boolean)
+
+    // Obtem as URLs das imagens
+    const imageUrlMap = await this.s3Service.getMultipleImageUrls(imageKeys)
+
+    // Mapeia as URLs das imagens
+    const productsDto = products.map((product) => {
+      const dto = new ProductsDto()
+      Object.assign(dto, product)
+
+      dto.picture_url = product.picture_key ? imageUrlMap[product.picture_key] : null
+
+      if ('picture_key' in dto) {
+        delete dto.picture_key
+      }
+
+      return dto
+    })
+
+    return {
+      data: productsDto,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    }
   }
 
   async findOne(id: string): Promise<Product> {
