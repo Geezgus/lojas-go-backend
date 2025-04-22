@@ -4,6 +4,7 @@ import { Product } from '@lib/stores/product.entity'
 import { HttpModule } from '@nestjs/axios'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ClientsModule, Transport } from '@nestjs/microservices'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { GeocodingService } from './services/geocoding/geocoding.service'
 import { ProductService } from './services/product/product.service'
@@ -33,6 +34,13 @@ import { StoresService } from './stores.service'
       }),
     }),
     TypeOrmModule.forFeature([Store, Address, Product]),
+    ClientsModule.register([
+      {
+        name: 'PRODUCTS_CLIENT',
+        transport: Transport.TCP,
+        options: { port: 3003 },
+      },
+    ]),
   ],
   controllers: [StoresController],
   providers: [StoresService, S3Service, GeocodingService, StoreMapperService, ProductService],

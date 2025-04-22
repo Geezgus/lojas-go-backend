@@ -2,7 +2,7 @@ import { IsNotEmpty, IsString } from 'class-validator'
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm'
 
 @Entity()
-@Unique(['cod'])
+@Unique(['code'])
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -10,7 +10,7 @@ export class Product {
   @Column()
   @IsNotEmpty()
   @IsString()
-  cod: string
+  code: string
 
   @Column()
   @IsNotEmpty()

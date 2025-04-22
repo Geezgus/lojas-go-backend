@@ -52,4 +52,8 @@ export class StoresService {
       }),
     )
   }
+
+  getStoreProducts(storeId: string, page: number, limit: number) {
+    return this.storesClient.send('STORES_PRODUCTS:FIND_BY_STORE', { storeId, page, limit })
+  }
 }

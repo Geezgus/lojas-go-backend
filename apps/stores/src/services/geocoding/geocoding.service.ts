@@ -1,4 +1,4 @@
-import { Address } from '@lib/stores'
+import { Address } from '@lib/stores/address.entity'
 import { HttpService } from '@nestjs/axios'
 import { Injectable } from '@nestjs/common'
 

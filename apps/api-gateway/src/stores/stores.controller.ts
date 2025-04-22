@@ -3,9 +3,11 @@ import { Product } from '@lib/stores/product.entity'
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Put,
@@ -62,5 +64,14 @@ export class StoresController {
   @Post(':storeId/products')
   addNewProduct(@Param('storeId') storeId: string, @Body() data: Partial<Product>) {
     return this.storesService.addNewProduct(storeId, data)
+  }
+
+  @Get(':storeId/products')
+  getStoreProducts(
+    @Param('storeId') storeId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number = 20,
+  ) {
+    return this.storesService.getStoreProducts(storeId, page, limit)
   }
 }

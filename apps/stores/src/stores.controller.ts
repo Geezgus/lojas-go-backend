@@ -81,4 +81,11 @@ export class StoresController {
       mimetype: fileData.mimetype,
     }
   }
+
+  @MessagePattern('STORES_PRODUCTS:FIND_BY_STORE')
+  async findByStore(@Payload() data: { storeId: string; page: number; limit: number }) {
+    const { storeId, page, limit } = data
+    const response = await this.productsService.findByStore(storeId, page, limit)
+    return response
+  }
 }

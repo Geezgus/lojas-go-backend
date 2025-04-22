@@ -22,6 +22,11 @@ export class ProductsController {
     return this.productsService.findOne(id)
   }
 
+  @MessagePattern('PRODUCTS:FIND_BY_CODES')
+  async getProductsByCodes(@Payload() data: { codes: string[] }) {
+    return this.productsService.findByCodes(data.codes)
+  }
+
   @MessagePattern('PRODUCTS:CREATE')
   create(
     @Payload()
