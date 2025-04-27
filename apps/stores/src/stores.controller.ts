@@ -90,4 +90,10 @@ export class StoresController {
     const response = await this.productsService.findByStore(storeId, page, limit, sortField, sortOrder)
     return response
   }
+
+  @MessagePattern('STORES_PRODUCTS:DELETE')
+  async deleteProduct(@Payload() { productId }: { productId: string }) {
+    const response = await this.productsService.delete(productId)
+    return response
+  }
 }

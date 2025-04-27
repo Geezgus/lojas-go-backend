@@ -76,4 +76,9 @@ export class StoresController {
   ) {
     return this.storesService.getStoreProducts(storeId, page, limit, sortField, sortOrder)
   }
+
+  @Delete('products/:productId')
+  deleteProduct(@Param('productId') productId: string) {
+    return this.storesService.deleteProduct(productId)
+  }
 }

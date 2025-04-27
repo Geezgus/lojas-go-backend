@@ -104,7 +104,15 @@ export class ProductService {
 
   async update() {}
 
-  async remove() {}
+  async delete(id: string) {
+    const product = await this.repository.findOne({ where: { id } })
+    if (!product) {
+      throw new RpcException(new ConflictException('Produto não encontrado.'))
+    }
+
+    await this.repository.delete(id)
+    return product
+  }
 
   private async isRegistred(store: Store, code: string) {
     let products = (await this.findAll(store)).filter((product) => product.code === code)
