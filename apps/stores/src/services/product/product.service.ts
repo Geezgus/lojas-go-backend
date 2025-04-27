@@ -29,12 +29,13 @@ export class ProductService {
   async findAll(store: Store): Promise<Product[]> {
     let products = await this.repository.find({
       where: { store },
+      order: { createdAt: 'ASC' },
     })
 
     return products
   }
 
-  async findByStore(storeId: string, page = 1, limit = 20) {
+  async findByStore(storeId: string, page = 1, limit = 10, sortField?: string, sortOrder: number = 1) {
     // Busca produtos paginados
     const [storeProducts, total] = await this.repository.findAndCount({
       where: { store: { id: storeId } },
@@ -69,11 +70,27 @@ export class ProductService {
     const productDetails = await firstValueFrom(productDetails$)
 
     // Mapeia detalhes
-    const mappedProducts = productDetails.map((product) => ({
-      ...product,
-      price: storeProductMap[product.code].price,
-      status: storeProductMap[product.code].status,
-    }))
+    let mappedProducts = storeProducts.map((storeProduct) => {
+      const productDetail = productDetails.find((product) => product.code === storeProduct.code)
+      return {
+        ...storeProduct,
+        price: storeProduct.price,
+        status: storeProduct.status,
+        name: productDetail?.name,
+        description: productDetail?.description,
+        picture_url: productDetail?.picture_url,
+      }
+    })
+
+    if (sortField) {
+      mappedProducts = mappedProducts.sort((a, b) => {
+        if (sortOrder === 1) {
+          return a[sortField] < b[sortField] ? -1 : 1
+        } else {
+          return a[sortField] > b[sortField] ? -1 : 1
+        }
+      })
+    }
 
     return {
       data: mappedProducts,

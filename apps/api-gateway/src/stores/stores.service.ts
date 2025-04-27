@@ -53,7 +53,7 @@ export class StoresService {
     )
   }
 
-  getStoreProducts(storeId: string, page: number, limit: number) {
-    return this.storesClient.send('STORES_PRODUCTS:FIND_BY_STORE', { storeId, page, limit })
+  getStoreProducts(storeId: string, page: number, limit: number, sortField?: string, sortOrder: number = 1) {
+    return this.storesClient.send('STORES_PRODUCTS:FIND_BY_STORE', { storeId, page, limit, sortField, sortOrder })
   }
 }
