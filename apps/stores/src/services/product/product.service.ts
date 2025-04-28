@@ -102,7 +102,15 @@ export class ProductService {
 
   async findOne() {}
 
-  async update() {}
+  async update(id: string, data: Partial<Product>) {
+    const product = await this.repository.findOne({ where: { id } })
+    if (!product) {
+      throw new RpcException(new ConflictException('Produto não encontrado.'))
+    }
+
+    data.id = id
+    return await this.repository.save(data)
+  }
 
   async delete(id: string) {
     const product = await this.repository.findOne({ where: { id } })

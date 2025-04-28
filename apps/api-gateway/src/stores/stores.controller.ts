@@ -77,6 +77,11 @@ export class StoresController {
     return this.storesService.getStoreProducts(storeId, page, limit, sortField, sortOrder)
   }
 
+  @Put('products/:productId')
+  updateProduct(@Param('productId') productId: string, @Body() data: Partial<Product>) {
+    return this.storesService.updateProduct(productId, data)
+  }
+
   @Delete('products/:productId')
   deleteProduct(@Param('productId') productId: string) {
     return this.storesService.deleteProduct(productId)

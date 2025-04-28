@@ -57,6 +57,14 @@ export class StoresService {
     return this.storesClient.send('STORES_PRODUCTS:FIND_BY_STORE', { storeId, page, limit, sortField, sortOrder })
   }
 
+  updateProduct(productId: string, data: Partial<Product>) {
+    return this.storesClient.send('STORES_PRODUCTS:UPDATE', { productId, data }).pipe(
+      catchError((error: any) => {
+        throw new HttpException(error.message, error.status)
+      }),
+    )
+  }
+
   deleteProduct(productId: string) {
     return this.storesClient.send('STORES_PRODUCTS:DELETE', { productId }).pipe(
       catchError((error: any) => {

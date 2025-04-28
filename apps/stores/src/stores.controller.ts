@@ -74,14 +74,6 @@ export class StoresController {
     return response
   }
 
-  private getImageData(fileData: { buffer: string; originalname: string; mimetype: string }) {
-    return {
-      buffer: Buffer.from(fileData.buffer, 'base64'),
-      originalname: fileData.originalname,
-      mimetype: fileData.mimetype,
-    }
-  }
-
   @MessagePattern('STORES_PRODUCTS:FIND_BY_STORE')
   async findByStore(
     @Payload() data: { storeId: string; page: number; limit: number; sortField?: string; sortOrder?: number },
@@ -91,9 +83,29 @@ export class StoresController {
     return response
   }
 
+  @MessagePattern('STORES_PRODUCTS:UPDATE')
+  async updateProduct(
+    @Payload()
+    payload: {
+      productId: string
+      data: Partial<Product>
+    },
+  ) {
+    const response = await this.productsService.update(payload.productId, payload.data)
+    return response
+  }
+
   @MessagePattern('STORES_PRODUCTS:DELETE')
   async deleteProduct(@Payload() { productId }: { productId: string }) {
     const response = await this.productsService.delete(productId)
     return response
+  }
+
+  private getImageData(fileData: { buffer: string; originalname: string; mimetype: string }) {
+    return {
+      buffer: Buffer.from(fileData.buffer, 'base64'),
+      originalname: fileData.originalname,
+      mimetype: fileData.mimetype,
+    }
   }
 }
