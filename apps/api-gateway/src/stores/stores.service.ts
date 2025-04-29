@@ -2,7 +2,7 @@ import { Product } from '@lib/stores/product.entity'
 import { CreateStoreDto, PartialUpdateStoreDto } from '@lib/stores/stores.dto'
 import { HttpException, Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
-import { catchError } from 'rxjs'
+import { catchError, firstValueFrom } from 'rxjs'
 
 @Injectable()
 export class StoresService {
@@ -71,5 +71,9 @@ export class StoresService {
         throw new HttpException(error.message, error.status)
       }),
     )
+  }
+
+  async bulkDelete(ids: string[]) {
+    return firstValueFrom(this.storesClient.send('STORES_PRODUCTS:BULK-DELETE', { ids }))
   }
 }

@@ -86,4 +86,9 @@ export class StoresController {
   deleteProduct(@Param('productId') productId: string) {
     return this.storesService.deleteProduct(productId)
   }
+
+  @Post('products/bulk-delete')
+  async bulkDelete(@Body() data: { ids: string[] }) {
+    return this.storesService.bulkDelete(data.ids)
+  }
 }

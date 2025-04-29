@@ -1,11 +1,10 @@
 import { Store } from '@lib/stores'
 import { Product } from '@lib/stores/product.entity'
-import { ConflictException, Inject, Injectable } from '@nestjs/common'
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { ClientProxy, RpcException } from '@nestjs/microservices'
 import { InjectRepository } from '@nestjs/typeorm'
 import { firstValueFrom } from 'rxjs'
-import { Repository } from 'typeorm'
-import { StoresService } from '../../stores.service'
+import { In, Repository } from 'typeorm'
 
 @Injectable()
 export class ProductService {
@@ -15,10 +14,13 @@ export class ProductService {
     @InjectRepository(Product)
     private repository: Repository<Product>,
 
-    private readonly storesService: StoresService,
+    // Removed unused storesService dependency
   ) {}
 
   async add(data: Partial<Product>, store: Store) {
+    if (!data.code) {
+      throw new RpcException(new ConflictException('O código do produto é obrigatório.'))
+    }
     await this.isRegistred(store, data.code)
 
     const product = this.repository.create({ ...data, store })
@@ -55,15 +57,6 @@ export class ProductService {
     }
     // Extrair codigos de produto
     const productCodes = storeProducts.map((product) => product.code)
-
-    // Cria mapa para acesso dos dados
-    const storeProductMap = storeProducts.reduce((map, product) => {
-      map[product.code] = {
-        price: product.price,
-        status: product.status,
-      }
-      return map
-    }, {})
 
     // Busca dados complenos no microservico de produtos
     const productDetails$ = this.productsClient.send('PRODUCTS:FIND_BY_CODES', { codes: productCodes })
@@ -120,6 +113,21 @@ export class ProductService {
 
     await this.repository.delete(id)
     return product
+  }
+
+  async bulkDelete(ids: string[]): Promise<{ success: boolean }> {
+    const products: Product[] = await this.repository.find({
+      where: { id: In(ids) },
+    })
+
+    if (products.length !== ids.length) {
+      throw new RpcException(new NotFoundException('Um ou mais produtos não foram encontrados'))
+    }
+
+    // Remover todos os produtos de uma vez
+    await this.repository.remove(products)
+
+    return { success: true }
   }
 
   private async isRegistred(store: Store, code: string) {

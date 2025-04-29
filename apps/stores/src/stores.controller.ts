@@ -101,6 +101,11 @@ export class StoresController {
     return response
   }
 
+  @MessagePattern('STORES_PRODUCTS:BULK-DELETE')
+  async bulkDelete(data: { ids: string[] }) {
+    return this.productsService.bulkDelete(data.ids)
+  }
+
   private getImageData(fileData: { buffer: string; originalname: string; mimetype: string }) {
     return {
       buffer: Buffer.from(fileData.buffer, 'base64'),
