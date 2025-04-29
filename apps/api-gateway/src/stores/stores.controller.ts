@@ -73,8 +73,9 @@ export class StoresController {
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number = 20,
     @Query('sortField') sortField?: string,
     @Query('sortOrder', new DefaultValuePipe('1'), ParseIntPipe) sortOrder: number = 1,
+    @Query('globalFilter') globalFilter?: string,
   ) {
-    return this.storesService.getStoreProducts(storeId, page, limit, sortField, sortOrder)
+    return this.storesService.getStoreProducts(storeId, page, limit, sortField, sortOrder, globalFilter)
   }
 
   @Put('products/:productId')

@@ -53,8 +53,22 @@ export class StoresService {
     )
   }
 
-  getStoreProducts(storeId: string, page: number, limit: number, sortField?: string, sortOrder: number = 1) {
-    return this.storesClient.send('STORES_PRODUCTS:FIND_BY_STORE', { storeId, page, limit, sortField, sortOrder })
+  getStoreProducts(
+    storeId: string,
+    page: number,
+    limit: number,
+    sortField?: string,
+    sortOrder: number = 1,
+    globalFilter?: string,
+  ) {
+    return this.storesClient.send('STORES_PRODUCTS:FIND_BY_STORE', {
+      storeId,
+      page,
+      limit,
+      sortField,
+      sortOrder,
+      globalFilter,
+    })
   }
 
   updateProduct(productId: string, data: Partial<Product>) {

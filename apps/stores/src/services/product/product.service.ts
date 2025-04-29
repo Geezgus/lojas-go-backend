@@ -37,7 +37,14 @@ export class ProductService {
     return products
   }
 
-  async findByStore(storeId: string, page = 1, limit = 10, sortField?: string, sortOrder: number = 1) {
+  async findByStore(
+    storeId: string,
+    page = 1,
+    limit = 10,
+    sortField?: string,
+    sortOrder: number = 1,
+    globalFilter?: string,
+  ) {
     // Busca produtos paginados
     const [storeProducts, total] = await this.repository.findAndCount({
       where: { store: { id: storeId } },
@@ -59,11 +66,25 @@ export class ProductService {
     const productCodes = storeProducts.map((product) => product.code)
 
     // Busca dados complenos no microservico de produtos
-    const productDetails$ = this.productsClient.send('PRODUCTS:FIND_BY_CODES', { codes: productCodes })
+    const productDetails$ = globalFilter
+      ? this.productsClient.send('PRODUCTS:FIND_BY_FILTER', { filter: globalFilter })
+      : this.productsClient.send('PRODUCTS:FIND_BY_CODES', { codes: productCodes })
     const productDetails = await firstValueFrom(productDetails$)
 
-    // Mapeia detalhes
-    let mappedProducts = storeProducts.map((storeProduct) => {
+    if (globalFilter && globalFilter.trim() && productDetails.length === 0) {
+      return {
+        data: [],
+        total: 0,
+        currentPage: page,
+        totalPages: 0,
+      }
+    }
+
+    const filteredCodes = globalFilter && globalFilter.trim() ? productDetails.map((pd) => pd.code) : productCodes
+
+    const filteredStoreProducts = storeProducts.filter((sp) => filteredCodes.includes(sp.code))
+
+    let mappedProducts = filteredStoreProducts.map((storeProduct) => {
       const productDetail = productDetails.find((product) => product.code === storeProduct.code)
       return {
         ...storeProduct,

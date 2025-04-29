@@ -3,7 +3,7 @@ import { RpcException } from '@nestjs/microservices'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ProductsDto } from 'libs/products/src/products.dto'
 import { Product } from 'libs/products/src/products.entity'
-import { In, Repository } from 'typeorm'
+import { ILike, In, Repository } from 'typeorm'
 import { S3Service } from './s3/s3.service'
 
 @Injectable()
@@ -85,6 +85,31 @@ export class ProductsService {
 
     const products = await this.productRepository.find({
       where: { code: In(codes) },
+    })
+
+    const imageKeys = products.map((product) => product.picture_key).filter(Boolean)
+
+    const imageUrlMap = await this.s3Service.getMultipleImageUrls(imageKeys)
+
+    return products.map((product) => {
+      const dto = new ProductsDto()
+      Object.assign(dto, product)
+
+      dto.picture_url = product.picture_key ? imageUrlMap[product.picture_key] : null
+
+      if ('picture_key' in dto) {
+        delete dto.picture_key
+      }
+
+      return dto
+    })
+  }
+
+  async findByFilter(filter: string): Promise<ProductsDto[]> {
+    if (!filter || filter.trim() === '') return []
+
+    const products = await this.productRepository.find({
+      where: [{ code: ILike(`%${filter}%`) }, { name: ILike(`%${filter}%`) }],
     })
 
     const imageKeys = products.map((product) => product.picture_key).filter(Boolean)

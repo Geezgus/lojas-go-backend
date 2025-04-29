@@ -76,10 +76,18 @@ export class StoresController {
 
   @MessagePattern('STORES_PRODUCTS:FIND_BY_STORE')
   async findByStore(
-    @Payload() data: { storeId: string; page: number; limit: number; sortField?: string; sortOrder?: number },
+    @Payload()
+    data: {
+      storeId: string
+      page: number
+      limit: number
+      sortField?: string
+      sortOrder?: number
+      globalFilter?: string
+    },
   ) {
-    const { storeId, page, limit, sortField, sortOrder } = data
-    const response = await this.productsService.findByStore(storeId, page, limit, sortField, sortOrder)
+    const { storeId, page, limit, sortField, sortOrder, globalFilter } = data
+    const response = await this.productsService.findByStore(storeId, page, limit, sortField, sortOrder, globalFilter)
     return response
   }
 

@@ -27,6 +27,11 @@ export class ProductsController {
     return this.productsService.findByCodes(data.codes)
   }
 
+  @MessagePattern('PRODUCTS:FIND_BY_FILTER')
+  async getProductsByFilter(@Payload() data: { filter: string }) {
+    return this.productsService.findByFilter(data.filter)
+  }
+
   @MessagePattern('PRODUCTS:CREATE')
   create(
     @Payload()
