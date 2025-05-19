@@ -53,6 +53,14 @@ export class StoresService {
     )
   }
 
+  async bulkAddProduct(storeId: string, data: Partial<Product>[]) {
+    return this.storesClient.send('STORES_PRODUCTS:BULK_ADD', { storeId, data }).pipe(
+      catchError((error: any) => {
+        throw new HttpException(error.message, error.status)
+      }),
+    )
+  }
+
   getStoreProducts(
     storeId: string,
     page: number,

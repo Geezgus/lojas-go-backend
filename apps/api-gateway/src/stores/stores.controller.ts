@@ -66,6 +66,11 @@ export class StoresController {
     return this.storesService.addNewProduct(storeId, data)
   }
 
+  @Post(':storeId/products/bulk-csv')
+  async bulkAddNewProduct(@Param('storeId') storeId: string, @Body() data: Partial<Product>[]) {
+    return this.storesService.bulkAddProduct(storeId, data)
+  }
+
   @Get(':storeId/products')
   getStoreProducts(
     @Param('storeId') storeId: string,

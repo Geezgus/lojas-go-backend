@@ -28,6 +28,34 @@ export class ProductService {
     return result
   }
 
+  async bulkAdd(data: Product[], store: Store) {
+    try {
+      const existing = await this.repository.find({
+        where: { store },
+        select: ['code'],
+      })
+      const existingCodes = new Set(existing.map((p) => p.code))
+
+      const toInsert = data.filter((d) => !existingCodes.has(d.code))
+
+      if (toInsert.length === 0) {
+        return { inserted: 0 }
+      }
+
+      await this.repository
+        .createQueryBuilder()
+        .insert()
+        .into(Product)
+        .values(toInsert.map((d) => ({ ...d, store })))
+        .orIgnore()
+        .execute()
+
+      return { inserted: data.length }
+    } catch (err: any) {
+      throw new RpcException(err.message)
+    }
+  }
+
   async findAll(store: Store): Promise<Product[]> {
     let products = await this.repository.find({
       where: { store },

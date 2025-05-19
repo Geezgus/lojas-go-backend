@@ -74,6 +74,12 @@ export class StoresController {
     return response
   }
 
+  @MessagePattern('STORES_PRODUCTS:BULK_ADD')
+  async bulkAddNewProduct(@Payload() { storeId, data }: { storeId: string; data: Product[] }) {
+    const store = await this.storesService.findOneEntity(storeId)
+    return this.productsService.bulkAdd(data, store)
+  }
+
   @MessagePattern('STORES_PRODUCTS:FIND_BY_STORE')
   async findByStore(
     @Payload()
