@@ -83,6 +83,11 @@ export class StoresController {
     return this.storesService.getStoreProducts(storeId, page, limit, sortField, sortOrder, globalFilter)
   }
 
+  @Get(':storeId/products/all')
+  getAllStoreProducts(@Param('storeId') storeId: string) {
+    return this.storesService.getAllStoreProducts(storeId)
+  }
+
   @Put('products/:productId')
   updateProduct(@Param('productId') productId: string, @Body() data: Partial<Product>) {
     return this.storesService.updateProduct(productId, data)

@@ -97,6 +97,11 @@ export class StoresController {
     return response
   }
 
+  @MessagePattern('STORES_PRODUCTS:FINDALL_BY_STORE')
+  async findAllByStore(@Payload() { storeId }: { storeId: string }) {
+    return await this.productsService.findAll(storeId)
+  }
+
   @MessagePattern('STORES_PRODUCTS:UPDATE')
   async updateProduct(
     @Payload()

@@ -79,6 +79,12 @@ export class StoresService {
     })
   }
 
+  getAllStoreProducts(storeId: string) {
+    return this.storesClient.send('STORES_PRODUCTS:FINDALL_BY_STORE', {
+      storeId,
+    })
+  }
+
   updateProduct(productId: string, data: Partial<Product>) {
     return this.storesClient.send('STORES_PRODUCTS:UPDATE', { productId, data }).pipe(
       catchError((error: any) => {

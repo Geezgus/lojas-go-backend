@@ -56,13 +56,13 @@ export class ProductService {
     }
   }
 
-  async findAll(store: Store): Promise<Product[]> {
+  async findAll(storeId: string): Promise<Product[]> {
     let products = await this.repository.find({
-      where: { store },
+      where: { store: { id: storeId } },
       order: { createdAt: 'ASC' },
     })
 
-    return products
+    return await this.hydrateProductsWithDetails(products)
   }
 
   async findByStore(
@@ -90,39 +90,8 @@ export class ProductService {
         totalPages: 0,
       }
     }
-    // Extrair codigos de produto
-    const productCodes = storeProducts.map((product) => product.code)
 
-    // Busca dados complenos no microservico de produtos
-    const productDetails$ = globalFilter
-      ? this.productsClient.send('PRODUCTS:FIND_BY_FILTER', { filter: globalFilter })
-      : this.productsClient.send('PRODUCTS:FIND_BY_CODES', { codes: productCodes })
-    const productDetails = await firstValueFrom(productDetails$)
-
-    if (globalFilter && globalFilter.trim() && productDetails.length === 0) {
-      return {
-        data: [],
-        total: 0,
-        currentPage: page,
-        totalPages: 0,
-      }
-    }
-
-    const filteredCodes = globalFilter && globalFilter.trim() ? productDetails.map((pd) => pd.code) : productCodes
-
-    const filteredStoreProducts = storeProducts.filter((sp) => filteredCodes.includes(sp.code))
-
-    let mappedProducts = filteredStoreProducts.map((storeProduct) => {
-      const productDetail = productDetails.find((product) => product.code === storeProduct.code)
-      return {
-        ...storeProduct,
-        price: storeProduct.price,
-        status: storeProduct.status,
-        name: productDetail?.name,
-        description: productDetail?.description,
-        picture_url: productDetail?.picture_url,
-      }
-    })
+    let mappedProducts = await this.hydrateProductsWithDetails(storeProducts, globalFilter)
 
     if (sortField) {
       mappedProducts = mappedProducts.sort((a, b) => {
@@ -180,10 +149,36 @@ export class ProductService {
   }
 
   private async isRegistred(store: Store, code: string) {
-    let products = (await this.findAll(store)).filter((product) => product.code === code)
+    let products = (await this.findAll(store.id!)).filter((product) => product.code === code)
 
     if (products.length > 0) {
       throw new RpcException(new ConflictException('Dados duplicados encontrados. Este registro já existe.'))
     }
+  }
+
+  private async hydrateProductsWithDetails(storeProducts: Product[], globalFilter?: string): Promise<any[]> {
+    const productCodes = storeProducts.map((product) => product.code)
+
+    const productDetails$ = globalFilter
+      ? this.productsClient.send('PRODUCTS:FIND_BY_FILTER', { filter: globalFilter })
+      : this.productsClient.send('PRODUCTS:FIND_BY_CODES', { codes: productCodes })
+
+    const productDetails = await firstValueFrom(productDetails$)
+
+    const filteredCodes = globalFilter && globalFilter.trim() ? productDetails.map((pd) => pd.code) : productCodes
+
+    const filteredStoreProducts = storeProducts.filter((sp) => filteredCodes.includes(sp.code))
+
+    return filteredStoreProducts.map((storeProduct) => {
+      const productDetail = productDetails.find((pd) => pd.code === storeProduct.code)
+      return {
+        ...storeProduct,
+        price: storeProduct.price,
+        status: storeProduct.status,
+        name: productDetail?.name,
+        description: productDetail?.description,
+        picture_url: productDetail?.picture_url,
+      }
+    })
   }
 }
