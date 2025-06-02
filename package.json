@@ -18,11 +18,12 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/api-gateway/test/jest-e2e.json",
-    "start:all": "node_modules/.bin/concurrently \"node dist/apps/users/main.js\" \"node dist/apps/products/main.js\" \"node dist/apps/stores/main.js\" \"node dist/apps/api-gateway/main.js\"",
-    "start:users": "node dist/apps/users/main.js",
-    "start:products": "node dist/apps/products/main.js",
-    "start:stores": "node dist/apps/stores/main.js",
-    "start:gateway": "node dist/apps/api-gateway/main.js"
+    "start:all": "concurrently \"npm run start:users\" \"npm run start:products\" \"npm run start:stores\" \"npm run start:gateway\"",
+    "start:users": "nest start users",
+    "start:products": "nest start products",
+    "start:stores": "nest start stores",
+    "start:gateway": "nest start api-gateway",
+    "dev:all": "concurrently \"npm run start:dev users\" \"npm run start:dev products\" \"npm run start:dev stores\" \"npm run start:dev api-gateway\""
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.0",
