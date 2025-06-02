@@ -18,10 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/api-gateway/test/jest-e2e.json",
-    "start:all": "node_modules/.bin/concurrently \"node dist/apps/users/main.js\" \"node dist/apps/products/main.js\" \"node dist/apps/stores/main.js\" \"node dist/apps/api-gateway/main.js\"",
-    "start:users": "node dist/apps/users/main.js",
-    "start:products": "node dist/apps/products/main.js",
-    "start:stores": "node dist/apps/stores/main.js",
+    "start:all": "node_modules/.bin/concurrently \"node dist/apps/users/apps/users/src/main.js\" \"node dist/apps/products/apps/products/src/main.js\" \"node dist/apps/stores/apps/stores/src/main.js\" \"node dist/apps/api-gateway/main.js\"",
+    "start:users": "node dist/apps/users/apps/users/src/main.js",
+    "start:products": "node dist/apps/products/apps/products/src/main.js",
+    "start:stores": "node dist/apps/stores/apps/stores/src/main.js",
     "start:gateway": "node dist/apps/api-gateway/main.js"
   },
   "dependencies": {
