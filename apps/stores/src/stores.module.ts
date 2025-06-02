@@ -24,11 +24,7 @@ import { StoresService } from './stores.service'
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<number>('POSTGRES_STORES_PORT'),
-        database: configService.get<string>('POSTGRES_STORES_DB'),
-        username: configService.get<string>('POSTGRES_USER'),
-        password: configService.get<string>('POSTGRES_PASSWORD'),
+        url: configService.get<string>('DB_URL_STORES'),
         entities: [Store, Address, Product],
         synchronize: true,
       }),

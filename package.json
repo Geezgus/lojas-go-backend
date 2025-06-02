@@ -17,7 +17,13 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/api-gateway/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/api-gateway/test/jest-e2e.json",
+    "start:all": "concurrently \"npm run start:users\" \"npm run start:products\" \"npm run start:stores\" \"npm run start:gateway\"",
+    "start:users": "nest start users",
+    "start:products": "nest start products",
+    "start:stores": "nest start stores",
+    "start:gateway": "nest start api-gateway",
+    "dev:all": "concurrently \"npm run start:dev users\" \"npm run start:dev products\" \"npm run start:dev stores\" \"npm run start:dev api-gateway\""
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.0",
@@ -50,6 +56,7 @@
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
+    "concurrently": "^9.1.2",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

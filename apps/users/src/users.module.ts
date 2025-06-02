@@ -17,11 +17,7 @@ import { UsersService } from './users.service'
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<number>('POSTGRES_USERS_PORT'),
-        database: configService.get<string>('POSTGRES_USERS_DB'),
-        username: configService.get<string>('POSTGRES_USER'),
-        password: configService.get<string>('POSTGRES_PASSWORD'),
+        url: configService.get<string>('DB_URL_USERS'),
         entities: [User],
         synchronize: true,
       }),

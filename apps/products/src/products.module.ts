@@ -18,11 +18,7 @@ import { S3Service } from './s3/s3.service'
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<number>('POSTGRES_PRODUCTS_PORT'),
-        database: configService.get<string>('POSTGRES_PRODUCTS_DB'),
-        username: configService.get<string>('POSTGRES_USER'),
-        password: configService.get<string>('POSTGRES_PASSWORD'),
+        url: configService.get<string>('DB_URL_PRODUCTS'),
         entities: [Product],
         synchronize: true,
       }),
