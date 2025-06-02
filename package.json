@@ -7,6 +7,11 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "build:users": "nest build users",
+    "build:products": "nest build products",
+    "build:stores": "nest build stores",
+    "build:api-gateway": "nest build api-gateway",
+    "build:all": "npm run build:users && npm run build:products && npm run build:stores && npm run build:api-gateway",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
