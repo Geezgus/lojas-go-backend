@@ -5,8 +5,8 @@ import { Injectable } from '@nestjs/common'
 @Injectable()
 export class UsersServiceMock {
   private users: User[] = [
-    { id: '1', name: 'User One', email: 'userone@email.com' },
-    { id: '2', name: 'User Two', email: 'usertwo@email.com' },
+    { id: '1', name: 'User One', email: 'userone@email.com', sub: '1' },
+    { id: '2', name: 'User Two', email: 'usertwo@email.com', sub: '2' },
   ]
 
   findAll(): Promise<User[]> {
