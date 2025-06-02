@@ -25,7 +25,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/users/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/users/tsconfig.app.json"
+        "tsConfigPath": "apps/users/tsconfig.app.json",
+        "webpack": false
       }
     },
     "stores": {
@@ -34,7 +35,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/stores/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/stores/tsconfig.app.json"
+        "tsConfigPath": "apps/stores/tsconfig.app.json",
+        "webpack": false
       }
     },
     "products": {
@@ -43,7 +45,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/products/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/products/tsconfig.app.json"
+        "tsConfigPath": "apps/products/tsconfig.app.json",
+        "webpack": false
       }
     }
   }
