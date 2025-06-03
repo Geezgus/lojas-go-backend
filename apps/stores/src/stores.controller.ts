@@ -67,6 +67,26 @@ export class StoresController {
     return this.storesService.delete(id)
   }
 
+  @MessagePattern('STORES:NEARBY')
+  findStoresNearby(
+    @Payload()
+    {
+      productCode,
+      userLat,
+      userLon,
+      radius,
+    }: {
+      productCode: string
+      userLat: number
+      userLon: number
+      radius: number
+    },
+  ) {
+    console.log('productCode recebido:', productCode)
+
+    return this.storesService.findStoresWithinRadius(productCode, userLat, userLon, radius)
+  }
+
   @MessagePattern('STORES_PRODUCTS:ADD')
   async addNewProduct(@Payload() { storeId, data }: { storeId: string; data: Partial<Product> }) {
     const store = await this.storesService.findOneEntity(storeId)

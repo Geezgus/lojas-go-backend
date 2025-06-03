@@ -104,4 +104,19 @@ export class StoresService {
   async bulkDelete(ids: string[]) {
     return firstValueFrom(this.storesClient.send('STORES_PRODUCTS:BULK-DELETE', { ids }))
   }
+
+  findStoresWithinRadius(productCode: string, userLat: number, userLon: number, radius: number) {
+    return this.storesClient
+      .send('STORES:NEARBY', {
+        productCode,
+        userLat,
+        userLon,
+        radius,
+      })
+      .pipe(
+        catchError((error: any) => {
+          throw new HttpException(error.message, error.status)
+        }),
+      )
+  }
 }

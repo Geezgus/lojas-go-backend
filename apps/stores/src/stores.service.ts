@@ -136,6 +136,64 @@ export class StoresService {
     return { status: HttpStatus.ACCEPTED, store: store }
   }
 
+  async findStoresWithinRadius(
+    productCode: string,
+    userLat: number,
+    userLon: number,
+    radius: number,
+  ): Promise<
+    {
+      id: string
+      user_id: string
+      cnpj: string
+      latitude: number
+      longitude: number
+      name: string
+      picture_url: string
+      distance: number
+    }[]
+  > {
+    const stores = await this.storesRepository
+      .createQueryBuilder('store')
+      .innerJoin('store.products', 'product')
+      .select([
+        'store.id',
+        'store.user_id',
+        'store.cnpj',
+        'store.latitude',
+        'store.longitude',
+        'store.name',
+        'store.picture_key',
+        `ST_DistanceSphere(
+          ST_MakePoint(store.longitude, store.latitude),
+          ST_MakePoint(:userLon, :userLat)
+        ) AS distance`,
+      ])
+      .where('product.code = :code', { code: productCode })
+      .andWhere(
+        `ST_DistanceSphere(
+          ST_MakePoint(store.longitude, store.latitude),
+          ST_MakePoint(:userLon, :userLat)
+        ) <= :radius`,
+        { userLon, userLat, radius },
+      )
+      .setParameters({ userLon, userLat })
+      .getRawMany()
+
+    return Promise.all(
+      stores.map(async (store) => ({
+        id: store.store_id,
+        user_id: store.store_user_id,
+        cnpj: store.store_cnpj,
+        latitude: parseFloat(store.store_latitude),
+        longitude: parseFloat(store.store_longitude),
+        name: store.store_name,
+        picture_url: await this.s3Service.getImageUrl(store.store_picture_key),
+        distance: parseFloat(store.distance),
+      })),
+    )
+  }
+
   private async existingCNPJ(cnpj: string) {
     const result = await this.storesRepository.findBy({ cnpj: cnpj })
     if (result.length > 0) {

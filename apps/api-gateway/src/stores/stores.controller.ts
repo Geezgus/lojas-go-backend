@@ -7,6 +7,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseFloatPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -21,6 +22,18 @@ import { StoresService } from './stores.service'
 @Controller('stores')
 export class StoresController {
   constructor(private readonly storesService: StoresService) {}
+
+  @Get('nearby')
+  findStoresWithinRadius(
+    @Query('productCode') productCode: string,
+    @Query('userLat', ParseFloatPipe) userLat: number,
+    @Query('userLon', ParseFloatPipe) userLon: number,
+    @Query('radius', ParseIntPipe) radius: number,
+  ) {
+    console.log('productCode recebido:', productCode)
+
+    return this.storesService.findStoresWithinRadius(productCode, userLat, userLon, radius)
+  }
 
   @Get()
   findAll(@Query('userId') userId: string) {
