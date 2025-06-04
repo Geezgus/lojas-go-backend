@@ -150,6 +150,7 @@ export class StoresService {
       longitude: number
       name: string
       picture_url: string
+      price: number
       distance: number
     }[]
   > {
@@ -164,6 +165,7 @@ export class StoresService {
         'store.longitude',
         'store.name',
         'store.picture_key',
+        'product.price',
         `ST_DistanceSphere(
           ST_MakePoint(store.longitude, store.latitude),
           ST_MakePoint(:userLon, :userLat)
@@ -189,6 +191,7 @@ export class StoresService {
         longitude: parseFloat(store.store_longitude),
         name: store.store_name,
         picture_url: await this.s3Service.getImageUrl(store.store_picture_key),
+        price: parseFloat(store.product_price),
         distance: parseFloat(store.distance),
       })),
     )
