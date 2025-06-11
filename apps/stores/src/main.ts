@@ -8,6 +8,8 @@ async function bootstrap() {
     transport: Transport.TCP,
     options: {
       port: 3002,
+      retryAttempts: 5,
+      retryDelay: 1000,
     },
   })
 

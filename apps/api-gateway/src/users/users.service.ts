@@ -1,6 +1,7 @@
 import { CreateUserDto, PartialUpdateUserDto, UpdateUserDto } from '@lib/users/users.dto'
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
+import { catchError } from 'rxjs'
 
 @Injectable()
 export class UsersService {
@@ -31,6 +32,14 @@ export class UsersService {
   }
 
   authenticate(data: CreateUserDto) {
-    return this.usersClient.send('USERS:AUTH', { data: data })
+    return this.usersClient.send('USERS:AUTH', { data: data }).pipe(
+      catchError((error) => {
+        if (error.message?.includes('ECONNREFUSED')) {
+          throw new HttpException('Serviço de usuários está fora do ar', HttpStatus.SERVICE_UNAVAILABLE)
+        }
+
+        throw new HttpException('Erro ao autenticar usuário', HttpStatus.UNAUTHORIZED)
+      }),
+    )
   }
 }

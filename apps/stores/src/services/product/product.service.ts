@@ -159,11 +159,25 @@ export class ProductService {
   private async hydrateProductsWithDetails(storeProducts: Product[], globalFilter?: string): Promise<any[]> {
     const productCodes = storeProducts.map((product) => product.code)
 
-    const productDetails$ = globalFilter
-      ? this.productsClient.send('PRODUCTS:FIND_BY_FILTER', { filter: globalFilter })
-      : this.productsClient.send('PRODUCTS:FIND_BY_CODES', { codes: productCodes })
+    let productDetails
 
-    const productDetails = await firstValueFrom(productDetails$)
+    try {
+      productDetails = await firstValueFrom(
+        globalFilter
+          ? this.productsClient.send('PRODUCTS:FIND_BY_FILTER', { filter: globalFilter })
+          : this.productsClient.send('PRODUCTS:FIND_BY_CODES', { codes: productCodes }),
+      )
+    } catch (error) {
+      if (
+        error instanceof AggregateError ||
+        error.message?.includes('ECONNREFUSED') ||
+        error.message?.includes('timeout')
+      ) {
+        throw new RpcException('Serviço de produtos está temporariamente indisponível')
+      }
+
+      throw new RpcException('Erro ao buscar produtos')
+    }
 
     const filteredCodes = globalFilter && globalFilter.trim() ? productDetails.map((pd) => pd.code) : productCodes
 
